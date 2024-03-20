@@ -8,8 +8,8 @@ const doc = {
     description: "API for Empire Command, a space strategy game.",
     version: "0.0.1",
   },
-  //host: '',
-  host: "localhost:3000",
+  host: "https://empire-command-api.onrender.com",
+  //host: "localhost:3000",
   schemes: ["https", "http"],
 
   tags: [

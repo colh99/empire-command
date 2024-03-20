@@ -5,7 +5,7 @@
     "description": "API for Empire Command, a space strategy game.",
     "version": "0.0.1"
   },
-  "host": "localhost:3000",
+  "host": "https://empire-command-api.onrender.com",
   "basePath": "/",
   "tags": [
     {
