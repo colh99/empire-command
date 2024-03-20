@@ -1,0 +1,884 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Empire Command API",
+    "description": "API for Empire Command, a space strategy game.",
+    "version": "0.0.1"
+  },
+  "host": "localhost:3000",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "Galaxies",
+      "description": "A game takes place in a single galaxy. The galaxy is used to store game rules and find systems and planets."
+    },
+    {
+      "name": "Planets",
+      "description": "Planets keep track of their resources, the buildings on them, and the ships in orbit. They can be owned by users."
+    },
+    {
+      "name": "Missions",
+      "description": "Missions are fleet actions that can be created by users to command their ships."
+    },
+    {
+      "name": "Users",
+      "description": "Users are the players of the game."
+    }
+  ],
+  "schemes": [
+    "https",
+    "http"
+  ],
+  "paths": {
+    "/galaxies/{id}/rules": {
+      "get": {
+        "tags": [
+          "Galaxies"
+        ],
+        "summary": "Get the rules of a galaxy by ID.",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Galaxies"
+        ],
+        "summary": "Update galaxy rules by ID.",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/Rules"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/galaxies/{id}/users": {
+      "get": {
+        "tags": [
+          "Galaxies"
+        ],
+        "summary": "Get the array of all users in a galaxy by ID.",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/galaxies/{id}/systems": {
+      "get": {
+        "tags": [
+          "Galaxies"
+        ],
+        "summary": "Get the array of all systems in a galaxy by ID.",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/galaxies/{id}/{systemNumber}": {
+      "get": {
+        "tags": [
+          "Galaxies"
+        ],
+        "summary": "Get a system in the galaxy by galaxy ID and system number.",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "systemNumber",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/galaxies/": {
+      "post": {
+        "tags": [
+          "Galaxies"
+        ],
+        "summary": "Create a new galaxy.",
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/Galaxy"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/galaxies/{id}": {
+      "delete": {
+        "tags": [
+          "Galaxies"
+        ],
+        "summary": "Delete a galaxy by ID.",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get a user by ID.",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/users/{username}": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get a user by username.",
+        "description": "",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/users/login": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Login a user.",
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/users/logout": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Logout a user.",
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/users/register": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Register a new user.",
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/planets/{galaxy}/{system}/{orbit}": {
+      "get": {
+        "tags": [
+          "Planets"
+        ],
+        "summary": "Get a planet at the given coordinates.",
+        "description": "",
+        "parameters": [
+          {
+            "name": "galaxy",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "system",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "orbit",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/planets/{id}": {
+      "get": {
+        "tags": [
+          "Planets"
+        ],
+        "summary": "Get a planet by ID.",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Planets"
+        ],
+        "summary": "Delete a planet by ID.",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/planets/": {
+      "post": {
+        "tags": [
+          "Planets"
+        ],
+        "summary": "Create a new planet in a given system and orbit.",
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/Planet"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/planets/{id}/rename": {
+      "put": {
+        "tags": [
+          "Planets"
+        ],
+        "summary": "Rename the planet by ID.",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "planetName": {
+                  "type": "string",
+                  "example": "New Name"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/planets/{id}/construct-building": {
+      "put": {
+        "tags": [
+          "Planets"
+        ],
+        "summary": "Construct or upgrade a building.",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/Buildings"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/planets/{id}/construct-ship": {
+      "put": {
+        "tags": [
+          "Planets"
+        ],
+        "summary": "Construct a ship to be added to the planet fleet.",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/Fleet"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/missions/{id}": {
+      "get": {
+        "tags": [
+          "Missions"
+        ],
+        "summary": "Get a mission by ID.",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Missions"
+        ],
+        "summary": "Delete a mission by ID (If still in transit, fleet and cargo will be lost!).",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/missions/": {
+      "get": {
+        "tags": [
+          "Missions"
+        ],
+        "summary": "Get all active missions.",
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Missions"
+        ],
+        "summary": "Create a new mission.",
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/Mission"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/missions/{user_id}": {
+      "get": {
+        "tags": [
+          "Missions"
+        ],
+        "summary": "Get all active missions from a specific user by user ID.",
+        "description": "",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/missions/{id}/recall": {
+      "put": {
+        "tags": [
+          "Missions"
+        ],
+        "summary": "Recall a mission to the origin planet (before it reaches the destination) by ID.",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Coordinates": {
+      "type": "object",
+      "properties": {
+        "galaxyNumber": {
+          "type": "number",
+          "example": 1
+        },
+        "system": {
+          "type": "number",
+          "example": 2
+        },
+        "orbit": {
+          "type": "number",
+          "example": 3
+        }
+      }
+    },
+    "Resources": {
+      "type": "object",
+      "properties": {
+        "metal": {
+          "type": "number",
+          "example": 1000
+        },
+        "crystal": {
+          "type": "number",
+          "example": 1000
+        },
+        "deuterium": {
+          "type": "number",
+          "example": 1000
+        }
+      }
+    },
+    "Fleet": {
+      "type": "object",
+      "properties": {
+        "battleCruiser": {
+          "type": "number",
+          "example": 0
+        },
+        "smallCargo": {
+          "type": "number",
+          "example": 0
+        },
+        "largeCargo": {
+          "type": "number",
+          "example": 0
+        },
+        "recycler": {
+          "type": "number",
+          "example": 0
+        },
+        "espionageProbe": {
+          "type": "number",
+          "example": 0
+        }
+      }
+    },
+    "Buildings": {
+      "type": "object",
+      "properties": {
+        "metalMine": {
+          "type": "number",
+          "example": 0
+        },
+        "crystalMine": {
+          "type": "number",
+          "example": 0
+        },
+        "deuteriumSynthesizer": {
+          "type": "number",
+          "example": 0
+        },
+        "solarPlant": {
+          "type": "number",
+          "example": 0
+        },
+        "fusionReactor": {
+          "type": "number",
+          "example": 0
+        },
+        "metalStorage": {
+          "type": "number",
+          "example": 0
+        },
+        "crystalStorage": {
+          "type": "number",
+          "example": 0
+        },
+        "deuteriumTank": {
+          "type": "number",
+          "example": 0
+        },
+        "shipyard": {
+          "type": "number",
+          "example": 0
+        }
+      }
+    },
+    "Planet": {
+      "type": "object",
+      "properties": {
+        "basicInfo": {
+          "type": "object",
+          "properties": {
+            "owner": {
+              "type": "string",
+              "example": "ObjectId"
+            },
+            "planetName": {
+              "type": "string",
+              "example": "Unnamed Planet"
+            },
+            "coordinates": {
+              "$ref": "#/definitions/Coordinates"
+            }
+          }
+        },
+        "fleet": {
+          "$ref": "#/definitions/Fleet"
+        },
+        "resources": {
+          "$ref": "#/definitions/Resources"
+        },
+        "buildings": {
+          "$ref": "#/definitions/Buildings"
+        }
+      }
+    },
+    "Mission": {
+      "type": "object",
+      "properties": {
+        "commandingUser": {
+          "type": "string",
+          "example": "ObjectId"
+        },
+        "originPlanet": {
+          "type": "string",
+          "example": "ObjectId"
+        },
+        "targetPlanet": {
+          "type": "string",
+          "example": "ObjectId"
+        },
+        "departureTime": {
+          "type": "function"
+        },
+        "arrivalTime": {
+          "type": "function"
+        },
+        "returnTime": {
+          "type": "function"
+        },
+        "active": {
+          "type": "boolean",
+          "example": true
+        },
+        "status": {
+          "type": "string",
+          "example": "en route"
+        },
+        "missionType": {
+          "type": "string",
+          "example": "raid"
+        },
+        "fleet": {
+          "$ref": "#/definitions/Fleet"
+        },
+        "cargo": {
+          "$ref": "#/definitions/Resources"
+        }
+      }
+    },
+    "System": {
+      "type": "object",
+      "properties": {
+        "systemNumber": {
+          "type": "number",
+          "example": 1
+        },
+        "orbits": {
+          "type": "array",
+          "example": [
+            "ObjectId"
+          ],
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "Rules": {
+      "type": "object",
+      "properties": {
+        "GAME_OVERALL_SPEED": {
+          "type": "number",
+          "example": 1
+        },
+        "TRAVEL_SPEED": {
+          "type": "number",
+          "example": 1
+        },
+        "MINING_SPEED": {
+          "type": "number",
+          "example": 1
+        },
+        "BUILDING_SPEED": {
+          "type": "number",
+          "example": 1
+        }
+      }
+    },
+    "Galaxy": {
+      "type": "object",
+      "properties": {
+        "galaxyNumber": {
+          "type": "number",
+          "example": 1
+        },
+        "galaxyName": {
+          "type": "string",
+          "example": "Unnamed Galaxy"
+        },
+        "rulesConfig": {
+          "$ref": "#/definitions/Rules"
+        },
+        "systems": {
+          "type": "array",
+          "example": [
+            "ObjectId"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "users": {
+          "type": "array",
+          "example": [
+            "ObjectId"
+          ],
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "User": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string",
+          "example": "User123"
+        },
+        "ownedPlanets": {
+          "type": "array",
+          "example": [
+            "ObjectId"
+          ],
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
