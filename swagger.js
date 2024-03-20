@@ -100,7 +100,7 @@ const doc = {
       galaxyNumber: 1,
       galaxyName: "Unnamed Galaxy",
       rulesConfig: { $ref: "#/definitions/Rules" },
-      systems: ["ObjectId"],
+      numSystems: 10,
       users: ["ObjectId"],
     },
     User: {

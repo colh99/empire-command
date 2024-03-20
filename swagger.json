@@ -168,8 +168,11 @@
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "201": {
+            "description": "Created"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
@@ -842,14 +845,9 @@
         "rulesConfig": {
           "$ref": "#/definitions/Rules"
         },
-        "systems": {
-          "type": "array",
-          "example": [
-            "ObjectId"
-          ],
-          "items": {
-            "type": "string"
-          }
+        "numSystems": {
+          "type": "number",
+          "example": 10
         },
         "users": {
           "type": "array",

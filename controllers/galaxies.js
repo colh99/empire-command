@@ -13,7 +13,17 @@ const getGalaxySystemsById = async (req, res) => {};
 const getGalaxySystemBySystem = async (req, res) => {};
 
 // Create a new galaxy
-const createGalaxy = async (req, res) => {};
+const createGalaxy = async (req, res) => {
+  const db = mongodb.getDb().db("empire-command").collection("galaxies");
+  const galaxy = req.body;
+  try {
+    const result = await db.insertOne(galaxy);
+    res.status(201).json({ message: "Galaxy created!", galaxy: galaxy });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Galaxy creation failed." });
+  }
+};
 
 // Update a galaxy's rules by ID
 const updateGalaxyRulesById = async (req, res) => {};
