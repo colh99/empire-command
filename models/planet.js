@@ -5,7 +5,7 @@ const fleetSchema = require('./fleetSchema'); // Import the fleet subschema
 const resourcesSchema = require('./resourcesSchema'); // Import the resources subschema
 
 const planetSchema = new Schema({
-    lastUpdate: {
+    lastUpdated: {
         type: Date,
         default: Date.now
     },
@@ -14,9 +14,8 @@ const planetSchema = new Schema({
         owner: ObjectId,
         planetName: String,
         coordinates: [{
-            galaxy: Number,
-            system: Number,
-            orbit: Number,
+            systemIndex: Number,
+            planetIndex: Number,
         }],
     }],
 

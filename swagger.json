@@ -5,7 +5,7 @@
     "description": "API for Empire Command, a space strategy game.",
     "version": "0.0.1"
   },
-  "host": "empire-command-api.onrender.com",
+  "host": "localhost:3000",
   "basePath": "/",
   "tags": [
     {
@@ -14,7 +14,7 @@
     },
     {
       "name": "Planets",
-      "description": "Planets keep track of their resources, the buildings on them, and the ships in orbit. They can be owned by users."
+      "description": "Planets keep track of their resources, the buildings on them, and their local fleet. They can be owned by users."
     },
     {
       "name": "Missions",
@@ -46,8 +46,11 @@
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       },
@@ -73,8 +76,11 @@
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
@@ -95,8 +101,11 @@
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -117,13 +126,16 @@
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
     },
-    "/galaxies/{id}/{systemNumber}": {
+    "/galaxies/{id}/{systemIndex}": {
       "get": {
         "tags": [
           "Galaxies"
@@ -138,15 +150,18 @@
             "type": "string"
           },
           {
-            "name": "systemNumber",
+            "name": "systemIndex",
             "in": "path",
             "required": true,
             "type": "string"
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -193,8 +208,11 @@
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
@@ -303,7 +321,7 @@
         }
       }
     },
-    "/planets/{galaxy}/{system}/{orbit}": {
+    "/planets/{galaxyId}/{systemIndex}/{planetIndex}": {
       "get": {
         "tags": [
           "Planets"
@@ -312,19 +330,19 @@
         "description": "",
         "parameters": [
           {
-            "name": "galaxy",
+            "name": "galaxyId",
             "in": "path",
             "required": true,
             "type": "string"
           },
           {
-            "name": "system",
+            "name": "systemIndex",
             "in": "path",
             "required": true,
             "type": "string"
           },
           {
-            "name": "orbit",
+            "name": "planetIndex",
             "in": "path",
             "required": true,
             "type": "string"
@@ -333,6 +351,48 @@
         "responses": {
           "default": {
             "description": ""
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Planets"
+        ],
+        "summary": "Create a new planet in a given system and planet index.",
+        "description": "",
+        "parameters": [
+          {
+            "name": "galaxyId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "systemIndex",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "planetIndex",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/Planet"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
@@ -370,29 +430,6 @@
             "in": "path",
             "required": true,
             "type": "string"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/planets/": {
-      "post": {
-        "tags": [
-          "Planets"
-        ],
-        "summary": "Create a new planet in a given system and orbit.",
-        "description": "",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "$ref": "#/definitions/Planet"
-            }
           }
         ],
         "responses": {
@@ -621,17 +658,13 @@
     "Coordinates": {
       "type": "object",
       "properties": {
-        "galaxyNumber": {
+        "systemIndex": {
           "type": "number",
           "example": 1
         },
-        "system": {
+        "planetIndex": {
           "type": "number",
           "example": 2
-        },
-        "orbit": {
-          "type": "number",
-          "example": 3
         }
       }
     },
@@ -731,17 +764,14 @@
             "planetName": {
               "type": "string",
               "example": "Unnamed Planet"
-            },
-            "coordinates": {
-              "$ref": "#/definitions/Coordinates"
             }
           }
         },
-        "fleet": {
-          "$ref": "#/definitions/Fleet"
-        },
         "resources": {
           "$ref": "#/definitions/Resources"
+        },
+        "fleet": {
+          "$ref": "#/definitions/Fleet"
         },
         "buildings": {
           "$ref": "#/definitions/Buildings"
@@ -792,24 +822,6 @@
         }
       }
     },
-    "System": {
-      "type": "object",
-      "properties": {
-        "systemNumber": {
-          "type": "number",
-          "example": 1
-        },
-        "orbits": {
-          "type": "array",
-          "example": [
-            "ObjectId"
-          ],
-          "items": {
-            "type": "string"
-          }
-        }
-      }
-    },
     "Rules": {
       "type": "object",
       "properties": {
@@ -834,10 +846,6 @@
     "Galaxy": {
       "type": "object",
       "properties": {
-        "galaxyNumber": {
-          "type": "number",
-          "example": 1
-        },
         "galaxyName": {
           "type": "string",
           "example": "Unnamed Galaxy"
@@ -848,15 +856,6 @@
         "numSystems": {
           "type": "number",
           "example": 10
-        },
-        "users": {
-          "type": "array",
-          "example": [
-            "ObjectId"
-          ],
-          "items": {
-            "type": "string"
-          }
         }
       }
     },

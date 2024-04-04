@@ -26,8 +26,8 @@ router.get('/:id/systems', controller.getGalaxySystemsById, (req, res) => {
     */
 });
 
-// Route to get a system in the galaxy by galaxy ID and system number
-router.get('/:id/:systemNumber', controller.getGalaxySystemBySystem, (req, res) => {
+// Route to get a system in the galaxy by galaxy ID and system index
+router.get('/:id/:systemIndex', controller.getGalaxySystemByNumber, (req, res) => {
     /*
     #swagger.summary = 'Get a system in the galaxy by galaxy ID and system number.'
     */

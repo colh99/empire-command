@@ -1,0 +1,16 @@
+// LOCALHOST
+
+### Create a galaxy
+POST http://localhost:3000/galaxies/
+content-type: application/json
+
+{
+  "galaxyName": "Andromeda",
+  "rulesConfig": {
+    "GAME_OVERALL_SPEED": 1,
+    "TRAVEL_SPEED": 1,
+    "MINING_SPEED": 1,
+    "BUILDING_SPEED": 1
+  },
+  "numSystems": 12
+}

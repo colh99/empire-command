@@ -1,21 +1,14 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const systemSchema = new Schema({
-    systemNumber: { type: Number, required: true },
-    orbits: [{ 
-        type: Schema.Types.ObjectId, 
-        ref: 'Planet', 
-        default: null 
-    }],
-});
+const systemSchema = new Schema([{
+    type: Schema.Types.ObjectId,
+    ref: 'Planet',
+    default: null
+}]);
 
 
 const galaxySchema = new Schema({
-    galaxyNumber: {
-        type: Number,
-        required: true
-    },
     galaxyName: {
         type: String,
         required: true

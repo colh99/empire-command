@@ -21,7 +21,7 @@ const doc = {
     {
       name: "Planets",
       description:
-        "Planets keep track of their resources, the buildings on them, and the ships in orbit. They can be owned by users.",
+        "Planets keep track of their resources, the buildings on them, and their local fleet. They can be owned by users.",
     },
     {
       name: "Missions",
@@ -36,9 +36,8 @@ const doc = {
 
   definitions: {
     Coordinates: {
-      galaxyNumber: 1,
-      system: 2,
-      orbit: 3,
+      systemIndex: 1,
+      planetIndex: 2,
     },
     Resources: {
       metal: 1000,
@@ -67,10 +66,9 @@ const doc = {
       basicInfo: {
         owner: "ObjectId",
         planetName: "Unnamed Planet",
-        coordinates: { $ref: "#/definitions/Coordinates" },
       },
-      fleet: { $ref: "#/definitions/Fleet" },
       resources: { $ref: "#/definitions/Resources" },
+      fleet: { $ref: "#/definitions/Fleet" },
       buildings: { $ref: "#/definitions/Buildings" },
     },
     Mission: {
@@ -86,10 +84,6 @@ const doc = {
       fleet: { $ref: "#/definitions/Fleet" },
       cargo: { $ref: "#/definitions/Resources" },
     },
-    System: {
-      systemNumber: 1,
-      orbits: ["ObjectId"],
-    },
     Rules: {
       GAME_OVERALL_SPEED: 1,
       TRAVEL_SPEED: 1,
@@ -97,11 +91,9 @@ const doc = {
       BUILDING_SPEED: 1,
     },
     Galaxy: {
-      galaxyNumber: 1,
       galaxyName: "Unnamed Galaxy",
       rulesConfig: { $ref: "#/definitions/Rules" },
       numSystems: 10,
-      users: ["ObjectId"],
     },
     User: {
       username: "User123",

@@ -7,7 +7,7 @@ const controller = require('../controllers/planets');
 
 
 // Route to get a planet by coordinates
-router.get('/:galaxy/:system/:orbit', controller.getPlanetByCoordinates, (req, res) => {
+router.get('/:galaxyId/:systemIndex/:planetIndex', controller.getPlanetByCoordinates, (req, res) => {
     /*
     #swagger.summary = 'Get a planet at the given coordinates.'
     */
@@ -21,9 +21,9 @@ router.get('/:id', controller.getPlanetById, (req, res) => {
 });
 
 // Route to CREATE a planet
-router.post('/', controller.createPlanet, (req, res) => {
+router.post('/:galaxyId/:systemIndex/:planetIndex', controller.createPlanet, (req, res) => {
     /*
-    #swagger.summary = 'Create a new planet in a given system and orbit.'
+    #swagger.summary = 'Create a new planet in a given system and planet index.'
         #swagger.parameters['body'] = {
         in: 'body',
         schema: {
