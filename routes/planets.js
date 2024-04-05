@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 // const { requiresAuth } = require('express-openid-connect');
 
+const validate = require('../middleware/validate');
 const controller = require('../controllers/planets');
-// const validation = require('../middleware/validate');
 
 
 // Route to get a planet by coordinates
@@ -21,7 +21,7 @@ router.get('/:id', controller.getPlanetById, (req, res) => {
 });
 
 // Route to CREATE a planet
-router.post('/:galaxyId/:systemIndex/:planetIndex', controller.createPlanet, (req, res) => {
+router.post('/:galaxyId/:systemIndex/:planetIndex', validate.createPlanet, controller.createPlanet, (req, res) => {
     /*
     #swagger.summary = 'Create a new planet in a given system and planet index.'
         #swagger.parameters['body'] = {

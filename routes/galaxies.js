@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 // const { requiresAuth } = require('express-openid-connect');
 
+const validate = require('../middleware/validate');
 const controller = require('../controllers/galaxies');
 
 
@@ -34,7 +35,7 @@ router.get('/:id/:systemIndex', controller.getGalaxySystemByNumber, (req, res) =
 });
 
 // Route to create a new galaxy
-router.post('/', controller.createGalaxy, (req, res) => {
+router.post('/', validate.createGalaxy, controller.createGalaxy, (req, res) => {
     /*
     #swagger.summary = 'Create a new galaxy.'
         #swagger.parameters['body'] = {
@@ -47,7 +48,7 @@ router.post('/', controller.createGalaxy, (req, res) => {
 });
 
 // Route to update a galaxy's rules by ID
-router.put('/:id/rules', controller.updateGalaxyRulesById, (req, res) => {
+router.put('/:id/rules', validate.updateGalaxyRulesById, controller.updateGalaxyRulesById, (req, res) => {
     /*
     #swagger.summary = 'Update galaxy rules by ID.'
         #swagger.parameters['body'] = {
