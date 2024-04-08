@@ -3,11 +3,50 @@ const { ObjectId } = require("mongodb");
 
 
 // Get a single planet's info by coordinates
-const getPlanetByCoordinates = async (req, res) => {};
+const getPlanetByCoordinates = async (req, res) => {
+  const galaxyId = new ObjectId(req.params.galaxyId);
+  const systemIndex = parseInt(req.params.systemIndex);
+  const planetIndex = parseInt(req.params.planetIndex);
+  const galaxy = await mongodb
+    .getDb()
+    .db("empire-command")
+    .collection("galaxies")
+    .findOne({ _id: galaxyId });
+
+  if (galaxy) {
+    const planetId = galaxy.systems[systemIndex][planetIndex];
+    const planet = await mongodb
+      .getDb()
+      .db("empire-command")
+      .collection("planets")
+      .findOne({ _id: planetId });
+
+    if (planet) {
+      res.status(200).json(planet);
+    } else {
+      res.status(404).json("No planet found at these coordinates.");
+    }
+  } else {
+    res.status(404).json("Galaxy not found.");
+  }
+};
 
 
 // Get a single planet's info by ID
-const getPlanetById = async (req, res) => {};
+const getPlanetById = async (req, res) => {
+  const planetId = new ObjectId(req.params.id);
+  const planet = await mongodb
+    .getDb()
+    .db("empire-command")
+    .collection("planets")
+    .findOne({ _id: planetId });
+
+  if (planet) {
+    res.status(200).json(planet);
+  } else {
+    res.status(404).json("Planet not found.");
+  }
+};
 
 
 // Create a new default planet at the given coordinates
@@ -66,7 +105,28 @@ const createPlanet = async (req, res) => {
 
 
 // Rename a planet
-const renamePlanet = async (req, res) => {};
+const renamePlanet = async (req, res) => {
+  const planetId = new ObjectId(req.params.id);
+  const newName = req.body.planetName;
+  const result = await mongodb
+    .getDb()
+    .db("empire-command")
+    .collection("planets")
+    .updateOne(
+      { _id: planetId },
+      {
+        $set: {
+          "basicInfo.planetName": newName,
+        }
+      }
+    );
+
+  if (result.acknowledged) {
+    res.status(200).json("Planet renamed to " + newName + ".");
+  } else {
+    res.status(500).json("Failed to rename planet.");
+  }
+};
 
 
 // Construct a building on a planet
