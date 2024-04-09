@@ -1,0 +1,38 @@
+{
+    "metalMine": {
+        "output": 100,
+        "energy": -10,
+        "cost": {
+            "metal": 300,
+            "crystal": 200,
+            "deuterium": 0
+        }
+    },
+    "crystalMine": {
+        "output": 67,
+        "energy": -10,
+        "cost": {
+            "metal": 300,
+            "crystal": 200,
+            "deuterium": 0,
+            "energy": -10
+        }
+    },
+    "deuteriumSynthesizer": {
+        "output": 40,
+        "energy": -15,
+        "cost": {
+            "metal": 200,
+            "crystal": 250,
+            "deuterium": 50
+        }
+    },
+    "fusionReactor": {
+        "energy": 40,
+        "cost": {
+            "metal": 150,
+            "crystal": 150,
+            "deuterium": 100
+        }
+    }
+}

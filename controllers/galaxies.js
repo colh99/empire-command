@@ -1,5 +1,5 @@
 const mongodb = require("../db/connect");
-const { ObjectId } = require("mongodb");
+const ObjectId = require("mongodb").ObjectId;
 
 // Get a single galaxy's rules by ID
 const getGalaxyRulesById = async (req, res) => {

@@ -1,55 +1,75 @@
 const mongodb = require("../db/connect");
-const { ObjectId } = require("mongodb");
-
+const ObjectId = require("mongodb").ObjectId;
+const simulation = require("../game-utils/simulation");
 
 // Get a single planet's info by coordinates
 const getPlanetByCoordinates = async (req, res) => {
-  const galaxyId = new ObjectId(req.params.galaxyId);
-  const systemIndex = parseInt(req.params.systemIndex);
-  const planetIndex = parseInt(req.params.planetIndex);
-  const galaxy = await mongodb
-    .getDb()
-    .db("empire-command")
-    .collection("galaxies")
-    .findOne({ _id: galaxyId });
+  try {
+    const galaxyId = new ObjectId(req.params.galaxyId);
+    const systemIndex = parseInt(req.params.systemIndex);
+    const planetIndex = parseInt(req.params.planetIndex);
+    const galaxy = await mongodb
+      .getDb()
+      .db("empire-command")
+      .collection("galaxies")
+      .findOne({ _id: galaxyId });
 
-  if (galaxy) {
-    const planetId = galaxy.systems[systemIndex][planetIndex];
+    if (galaxy) {
+      const planetId = galaxy.systems[systemIndex][planetIndex];
+      const planet = await mongodb
+        .getDb()
+        .db("empire-command")
+        .collection("planets")
+        .findOne({ _id: planetId });
+
+      // Update the planet's resources before returning it
+      const updatedPlanet = await simulation.updatePlanetResources(planet, galaxy);
+
+      if (updatedPlanet) {
+        res.status(200).json(updatedPlanet);
+      } else {
+        res.status(404).json("No planet found at these coordinates.");
+      }
+    } else {
+      res.status(404).json("Galaxy not found.");
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json("An error occurred.");
+  }
+};
+
+// Get a single planet's info by ID
+const getPlanetById = async (req, res) => {
+  try {
+    const planetId = new ObjectId(req.params.id);
     const planet = await mongodb
       .getDb()
       .db("empire-command")
       .collection("planets")
       .findOne({ _id: planetId });
 
-    if (planet) {
+    const galaxy = await mongodb
+      .getDb()
+      .db("empire-command")
+      .collection("galaxies")
+      .findOne({ _id: planet.galaxyId });
+
+    // Update the planet's resources before returning it
+    const updatedPlanet = await simulation.updatePlanetResources(planet, galaxy);
+
+    if (updatedPlanet) {
       res.status(200).json(planet);
     } else {
-      res.status(404).json("No planet found at these coordinates.");
+      res.status(404).json("Planet not found.");
     }
-  } else {
-    res.status(404).json("Galaxy not found.");
+  } catch (err) {
+    console.error(err);
+    res.status(500).json("An error occurred.");
   }
 };
 
-
-// Get a single planet's info by ID
-const getPlanetById = async (req, res) => {
-  const planetId = new ObjectId(req.params.id);
-  const planet = await mongodb
-    .getDb()
-    .db("empire-command")
-    .collection("planets")
-    .findOne({ _id: planetId });
-
-  if (planet) {
-    res.status(200).json(planet);
-  } else {
-    res.status(404).json("Planet not found.");
-  }
-};
-
-
-// Create a new default planet at the given coordinates
+// Create a new planet at the given coordinates
 const createPlanet = async (req, res) => {
   const galaxyId = new ObjectId(req.params.galaxyId);
   const givenSystemIndex = parseInt(req.params.systemIndex);
@@ -90,8 +110,9 @@ const createPlanet = async (req, res) => {
         { _id: galaxyId },
         {
           $set: {
-            [`systems.${givenSystemIndex}.${givenPlanetIndex}`]: result.insertedId,
-          }
+            [`systems.${givenSystemIndex}.${givenPlanetIndex}`]:
+              result.insertedId,
+          },
         }
       );
 
@@ -102,7 +123,6 @@ const createPlanet = async (req, res) => {
     res.status(500).json("Failed to create planet.");
   }
 };
-
 
 // Rename a planet
 const renamePlanet = async (req, res) => {
@@ -117,7 +137,7 @@ const renamePlanet = async (req, res) => {
       {
         $set: {
           "basicInfo.planetName": newName,
-        }
+        },
       }
     );
 
@@ -128,18 +148,79 @@ const renamePlanet = async (req, res) => {
   }
 };
 
-
 // Construct a building on a planet
-const constructBuilding = async (req, res) => {};
+const constructBuilding = async (req, res) => {
+  const planetId = new ObjectId(req.params.id);
+  const buildings = req.body;
+  const updateQuery = { $inc: {} };
 
+  for (const building in buildings) {
+    updateQuery.$inc[`buildings.${building}`] = buildings[building];
+  }
+
+  const result = await mongodb
+    .getDb()
+    .db("empire-command")
+    .collection("planets")
+    .updateOne({ _id: planetId }, updateQuery);
+
+  if (result.acknowledged) {
+    res.status(200).json("Buildings constructed.");
+  } else {
+    res.status(500).json("Failed to construct buildings.");
+  }
+};
 
 // Construct a ship on a planet
 const constructShip = async (req, res) => {};
 
+// Delete a planet. This means removing the planet reference from the galaxy according to the planet coordinates and deleting the planet object.
+const deletePlanet = async (req, res) => {
+  const planetId = new ObjectId(req.params.id);
+  const planet = await mongodb
+    .getDb()
+    .db("empire-command")
+    .collection("planets")
+    .findOne({ _id: planetId });
 
-// Delete a planet
-const deletePlanet = async (req, res) => {};
+  if (planet) {
+    const galaxyId = planet.galaxyId;
+    const systemIndex = planet.basicInfo.coordinates.systemIndex;
+    const planetIndex = planet.basicInfo.coordinates.planetIndex;
+    // Remove the planet reference from the galaxy
+    const updateGalaxyResult = await mongodb
+      .getDb()
+      .db("empire-command")
+      .collection("galaxies")
+      .updateOne(
+        { _id: galaxyId },
+        {
+          $set: {
+            [`systems.${systemIndex}.${planetIndex}`]: null,
+          },
+        }
+      );
 
+    if (updateGalaxyResult.acknowledged) {
+      // Delete the planet object
+      const deletePlanetResult = await mongodb
+        .getDb()
+        .db("empire-command")
+        .collection("planets")
+        .deleteOne({ _id: planetId });
+
+      if (deletePlanetResult.acknowledged) {
+        res.status(200).json("Planet deleted.");
+      } else {
+        res.status(500).json("Failed to delete planet.");
+      }
+    } else {
+      res.status(500).json("Failed to update galaxy.");
+    }
+  } else {
+    res.status(404).json("Planet not found.");
+  }
+};
 
 module.exports = {
   getPlanetByCoordinates,
