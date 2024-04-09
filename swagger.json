@@ -569,14 +569,39 @@
           {
             "name": "body",
             "in": "body",
+            "description": "Ship Types: battleCruiser, smallCargo, largeCargo, espionageProbe, recycler",
             "schema": {
-              "$ref": "#/definitions/Fleet"
+              "type": "object",
+              "properties": {
+                "ship": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "smallCargo"
+                    },
+                    "quantity": {
+                      "type": "number",
+                      "example": 1
+                    }
+                  }
+                }
+              }
             }
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "412": {
+            "description": "Precondition Failed"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }

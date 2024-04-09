@@ -203,8 +203,54 @@ const constructBuilding = async (req, res) => {
   }
 };
 
-// Construct a ship on a planet
-const constructShip = async (req, res) => {};
+// Construct ships of a given type on a planet
+const constructShip = async (req, res) => {
+  const planetId = new ObjectId(req.params.id);
+  const ship = req.body.ship;
+  const updateQuery = { $inc: {} };
+
+  // Get the planet and galaxy objects
+  let planet = await mongodb
+    .getDb()
+    .db("empire-command")
+    .collection("planets")
+    .findOne({ _id: planetId });
+
+  const galaxy = await mongodb
+    .getDb()
+    .db("empire-command")
+    .collection("galaxies")
+    .findOne({ _id: planet.galaxyId });
+
+  // Update the planet's resources
+  planet = await simulation.updatePlanetResources(planet, galaxy);
+
+  // Check if the planet has enough resources to construct the ships
+  const totalCost = await simulation.checkShipResourceCost(planet, ship);
+  if (totalCost) {
+    // Update the planet's resources
+    updateQuery.$inc["resources.metal"] = -totalCost.metal;
+    updateQuery.$inc["resources.crystal"] = -totalCost.crystal;
+    updateQuery.$inc["resources.deuterium"] = -totalCost.deuterium;
+    // Construct the ships
+    updateQuery.$inc[`fleet.${ship.type}`] = ship.quantity;
+  } else {
+    res.status(400).json("Insufficient resources to construct ships.");
+    return;
+  }
+
+  const result = await mongodb
+    .getDb()
+    .db("empire-command")
+    .collection("planets")
+    .updateOne({ _id: planetId }, updateQuery);
+
+  if (result.acknowledged) {
+    res.status(200).json("Ships constructed.");
+  } else {
+    res.status(500).json("Failed to construct ships.");
+  }
+};
 
 // Delete a planet. This means removing the planet reference from the galaxy according to the planet coordinates and deleting the planet object.
 const deletePlanet = async (req, res) => {

@@ -1,6 +1,7 @@
 const mongodb = require("../db/connect");
 const ObjectId = require("mongodb").ObjectId;
 const buildingData = require("../game-utils/game-rules/buildings");
+const shipData = require("../game-utils/game-rules/ships");
 const Validator = require("validatorjs");
 const validator = async (body, rules, customMessages, callback) => {
   const validation = new Validator(body, rules, customMessages);
@@ -146,10 +147,37 @@ const constructBuilding = async (req, res, next) => {
   });
 };
 
+const constructShip = async (req, res, next) => {
+  // Validate the ship type. It should read as one of the ships in shipData
+  const shipTypes = Object.keys(shipData);
+  const rules = {
+    "ship.type": `required|string|in:${shipTypes.join(",")}`,
+    "ship.quantity": "required|numeric|min:1",
+  };
+  const customMessages = {
+    required: "The :attribute field is required.",
+    in:
+      "The :attribute field must be one of the following: " +
+      shipTypes.join(", "),
+    numeric: "The :attribute field must be a number.",
+  };
+  validator(req.body, rules, customMessages, (err, status) => {
+    if (!status) {
+      res.status(412).json({
+        message: "Validation failed",
+        error: err,
+      });
+    } else {
+      next();
+    }
+  });
+};
+
 module.exports = {
   createGalaxy,
   updateGalaxyRulesById,
 
   createPlanet,
   constructBuilding,
+  constructShip,
 };

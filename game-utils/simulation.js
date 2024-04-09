@@ -1,6 +1,7 @@
 const mongodb = require("../db/connect");
 const ObjectId = require("mongodb").ObjectId;
 const buildingData = require("../game-utils/game-rules/buildings");
+const shipData = require("../game-utils/game-rules/ships");
 
 /**
  * Updates the resources of a planet based on the time difference since the last update.
@@ -89,8 +90,45 @@ const checkBuildingResourceCost = async (planet, building) => {
       deuterium: buildingData[building].cost.deuterium,
     };
 
-    console.log("--CHECK BUILDING RESOURCE COST")
+    console.log("--CHECK BUILDING RESOURCE COST");
     console.log("Building:", building);
+    console.log("Total cost: ", totalCost);
+    console.log("Planet resources after cost: ", {
+      metal: planet.resources.metal - totalCost.metal,
+      crystal: planet.resources.crystal - totalCost.crystal,
+      deuterium: planet.resources.deuterium - totalCost.deuterium,
+    });
+
+    // Check if the planet has enough resources
+    if (
+      planet.resources.metal >= totalCost.metal &&
+      planet.resources.crystal >= totalCost.crystal &&
+      planet.resources.deuterium >= totalCost.deuterium
+    ) {
+      return totalCost;
+    } else {
+      return false;
+    }
+  }
+};
+
+/**
+ * Determines if the planet has enough resources to construct the ship.
+ * @param  {[object]} planet The planet object being constructed on
+ * @param  {[object]} ship The ship.type and ship.quantity to be constructed
+ * @return {[object]} Returns the total cost of the ship if the planet has enough resources, otherwise returns false.
+ * @async
+ */
+const checkShipResourceCost = async (planet, ship) => {
+  if (planet && ship) {
+    const totalCost = {
+      metal: shipData[ship.type].cost.metal * ship.quantity,
+      crystal: shipData[ship.type].cost.crystal * ship.quantity,
+      deuterium: shipData[ship.type].cost.deuterium * ship.quantity,
+    };
+
+    console.log("--CHECK SHIP RESOURCE COST");
+    console.log("Ship:", ship);
     console.log("Total cost: ", totalCost);
     console.log("Planet resources after cost: ", {
       metal: planet.resources.metal - totalCost.metal,
@@ -114,4 +152,5 @@ const checkBuildingResourceCost = async (planet, building) => {
 module.exports = {
   updatePlanetResources,
   checkBuildingResourceCost,
+  checkShipResourceCost,
 };

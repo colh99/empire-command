@@ -61,13 +61,17 @@ router.put('/:id/construct-building', validate.constructBuilding, controller.con
 });
 
 // Route to construct a ship on a planet
-router.put('/:id/construct-ship', controller.constructShip, (req, res) => {
+router.put('/:id/construct-ship', validate.constructShip, controller.constructShip, (req, res) => {
     /*
     #swagger.summary = 'Construct a ship to be added to the planet fleet.'
         #swagger.parameters['body'] = {
         in: 'body',
+        description: 'Ship Types: battleCruiser, smallCargo, largeCargo, espionageProbe, recycler',
         schema: {
-            $ref: '#/definitions/Fleet',
+            "ship": {
+                "type": "smallCargo",
+                "quantity": 1
+            }
         }
     }
     */

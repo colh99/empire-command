@@ -1,0 +1,57 @@
+{
+    "battleCruiser": {
+        "speed": 100,
+        "fuelConsumption": 150,
+        "cargo": 800,
+        "attackPower": 100,
+        "cost": {
+            "metal": 4000,
+            "crystal": 2000,
+            "deuterium": 800
+        }
+    },
+    "smallCargo": {
+        "speed": 400,
+        "fuelConsumption": 50,
+        "cargo": 5000,
+        "attackPower": 10,
+        "cost": {
+            "metal": 1000,
+            "crystal": 1000,
+            "deuterium": 0
+        }
+    },
+    "largeCargo": {
+        "speed": 200,
+        "fuelConsumption": 100,
+        "cargo": 25000,
+        "attackPower": 15,
+        "cost": {
+            "metal": 3000,
+            "crystal": 3000,
+            "deuterium": 0
+        }
+    },
+    "espionageProbe": {
+        "speed": 100000000,
+        "fuelConsumption": 1,
+        "cargo": 0,
+        "attackPower": 0,
+        "cost": {
+            "metal": 0,
+            "crystal": 500,
+            "deuterium": 0
+        }
+    },
+    "recycler": {
+        "speed": 200,
+        "fuelConsumption": 100,
+        "cargo": 20000,
+        "attackPower": 10,
+        "cost": {
+            "metal": 3000,
+            "crystal": 2000,
+            "deuterium": 500
+        }
+    }
+}
