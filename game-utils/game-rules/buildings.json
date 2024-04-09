@@ -27,11 +27,50 @@
             "deuterium": 50
         }
     },
+    "solarPlant": {
+        "energy": 30,
+        "cost": {
+            "metal": 150,
+            "crystal": 150,
+            "deuterium": 0
+        }
+    },
     "fusionReactor": {
         "energy": 40,
         "cost": {
             "metal": 150,
             "crystal": 150,
+            "deuterium": 100
+        }
+    },
+    "metalStorage": {
+        "capacity": 10000,
+        "cost": {
+            "metal": 500,
+            "crystal": 0,
+            "deuterium": 0
+        }
+    },
+    "crystalStorage": {
+        "capacity": 10000,
+        "cost": {
+            "metal": 500,
+            "crystal": 200,
+            "deuterium": 0
+        }
+    },
+    "deuteriumTank": {
+        "capacity": 10000,
+        "cost": {
+            "metal": 500,
+            "crystal": 300,
+            "deuterium": 0
+        }
+    },
+    "shipyard": {
+        "cost": {
+            "metal": 400,
+            "crystal": 200,
             "deuterium": 100
         }
     }

@@ -524,14 +524,27 @@
           {
             "name": "body",
             "in": "body",
+            "description": "Building Types: metalMine, crystalMine, deuteriumSynthesizer, solarPlant, fusionReactor, metalStorage, crystalStorage, deuteriumTank, shipyard.",
             "schema": {
-              "$ref": "#/definitions/Buildings"
+              "type": "object",
+              "properties": {
+                "building": {
+                  "type": "string",
+                  "example": "metalMine"
+                }
+              }
             }
           }
         ],
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "412": {
+            "description": "Precondition Failed"
           },
           "500": {
             "description": "Internal Server Error"

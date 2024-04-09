@@ -23,7 +23,10 @@ const getPlanetByCoordinates = async (req, res) => {
         .findOne({ _id: planetId });
 
       // Update the planet's resources before returning it
-      const updatedPlanet = await simulation.updatePlanetResources(planet, galaxy);
+      const updatedPlanet = await simulation.updatePlanetResources(
+        planet,
+        galaxy
+      );
 
       if (updatedPlanet) {
         res.status(200).json(updatedPlanet);
@@ -56,10 +59,13 @@ const getPlanetById = async (req, res) => {
       .findOne({ _id: planet.galaxyId });
 
     // Update the planet's resources before returning it
-    const updatedPlanet = await simulation.updatePlanetResources(planet, galaxy);
+    const updatedPlanet = await simulation.updatePlanetResources(
+      planet,
+      galaxy
+    );
 
     if (updatedPlanet) {
-      res.status(200).json(planet);
+      res.status(200).json(updatedPlanet);
     } else {
       res.status(404).json("Planet not found.");
     }
@@ -151,11 +157,37 @@ const renamePlanet = async (req, res) => {
 // Construct a building on a planet
 const constructBuilding = async (req, res) => {
   const planetId = new ObjectId(req.params.id);
-  const buildings = req.body;
+  const building = req.body.building;
   const updateQuery = { $inc: {} };
 
-  for (const building in buildings) {
-    updateQuery.$inc[`buildings.${building}`] = buildings[building];
+  // Get the planet and galaxy objects
+  let planet = await mongodb
+    .getDb()
+    .db("empire-command")
+    .collection("planets")
+    .findOne({ _id: planetId });
+
+  const galaxy = await mongodb
+    .getDb()
+    .db("empire-command")
+    .collection("galaxies")
+    .findOne({ _id: planet.galaxyId });
+
+  // Update the planet's resources
+  planet = await simulation.updatePlanetResources(planet, galaxy);
+
+  // Check if the planet has enough resources to construct the building
+  const totalCost = await simulation.checkBuildingResourceCost(planet, building);
+  if (totalCost) {
+    // Update the planet's resources
+    updateQuery.$inc["resources.metal"] = -totalCost.metal;
+    updateQuery.$inc["resources.crystal"] = -totalCost.crystal;
+    updateQuery.$inc["resources.deuterium"] = -totalCost.deuterium;
+    // Construct the building
+    updateQuery.$inc[`buildings.${building}`] = 1;
+  } else {
+    res.status(400).json("Insufficient resources to construct building.");
+    return;
   }
 
   const result = await mongodb
@@ -165,7 +197,7 @@ const constructBuilding = async (req, res) => {
     .updateOne({ _id: planetId }, updateQuery);
 
   if (result.acknowledged) {
-    res.status(200).json("Buildings constructed.");
+    res.status(200).json("Building constructed.");
   } else {
     res.status(500).json("Failed to construct buildings.");
   }

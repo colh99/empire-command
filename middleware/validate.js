@@ -1,5 +1,6 @@
 const mongodb = require("../db/connect");
 const ObjectId = require("mongodb").ObjectId;
+const buildingData = require("../game-utils/game-rules/buildings");
 const Validator = require("validatorjs");
 const validator = async (body, rules, customMessages, callback) => {
   const validation = new Validator(body, rules, customMessages);
@@ -102,14 +103,45 @@ const createPlanet = async (req, res, next) => {
         .collection("galaxies")
         .findOne({ _id: galaxyId });
       if (galaxy) {
-        if (galaxy.systems[givenSystemIndex] && galaxy.systems[givenSystemIndex][givenPlanetIndex] === null) {
+        if (
+          galaxy.systems[givenSystemIndex] &&
+          galaxy.systems[givenSystemIndex][givenPlanetIndex] === null
+        ) {
           next();
         } else {
-          res.status(412).json("Invalid coordinates. The coordinates may be out of bounds or already occupied.");
+          res
+            .status(412)
+            .json(
+              "Invalid coordinates. The coordinates may be out of bounds or already occupied."
+            );
         }
       } else {
         res.status(404).json("Galaxy not found.");
       }
+    }
+  });
+};
+
+const constructBuilding = async (req, res, next) => {
+  // Validate the building type. It should read as one of the buildings in buildingData
+  const buildingTypes = Object.keys(buildingData);
+  const rules = {
+    building: `required|string|in:${buildingTypes.join(",")}`,
+  };
+  const customMessages = {
+    required: "The :attribute field is required.",
+    in:
+      "The :attribute field must be one of the following: " +
+      buildingTypes.join(", "),
+  };
+  validator(req.body, rules, customMessages, (err, status) => {
+    if (!status) {
+      res.status(412).json({
+        message: "Validation failed",
+        error: err,
+      });
+    } else {
+      next();
     }
   });
 };
@@ -119,4 +151,5 @@ module.exports = {
   updateGalaxyRulesById,
 
   createPlanet,
+  constructBuilding,
 };

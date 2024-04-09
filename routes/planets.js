@@ -47,13 +47,14 @@ router.put('/:id/rename', controller.renamePlanet, (req, res) => {
 });
 
 // Route to build on a planet
-router.put('/:id/construct-building', controller.constructBuilding, (req, res) => {
+router.put('/:id/construct-building', validate.constructBuilding, controller.constructBuilding, (req, res) => {
     /*
     #swagger.summary = 'Construct or upgrade a building.'
         #swagger.parameters['body'] = {
         in: 'body',
+        description: 'Building Types: metalMine, crystalMine, deuteriumSynthesizer, solarPlant, fusionReactor, metalStorage, crystalStorage, deuteriumTank, shipyard.',
         schema: {
-            $ref: '#/definitions/Buildings',
+            "building": "metalMine",
         }
     }
     */
