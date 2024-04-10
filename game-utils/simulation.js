@@ -149,8 +149,58 @@ const checkShipResourceCost = async (planet, ship) => {
   }
 };
 
+const colonizePlanet = async (user, galaxy, coordinates) => {
+  if (user && galaxy && coordinates) {
+    console.log("--COLONIZE PLANET");
+    // Give the user a planet in the galaxy
+    const planet = {
+      galaxyId: galaxy._id,
+      lastUpdated: new Date(),
+      basicInfo: {
+        owner: user._id,
+        planetName: user.gameProfile.nickname + "'s Planet",
+        coordinates: {
+          systemIndex: coordinates.systemIndex,
+          planetIndex: coordinates.planetIndex,
+        },
+      },
+      inboundMissions: [],
+      outboundMissions: [],
+      resources: {
+        metal: 1000,
+        crystal: 1000,
+        deuterium: 1000,
+      },
+      fleet: {
+        battleCruiser: 0,
+        smallCargo: 0,
+        largeCargo: 0,
+        recycler: 0,
+        espionageProbe: 0,
+      },
+      buildings: {
+        metalMine: 0,
+        crystalMine: 0,
+        deuteriumSynthesizer: 0,
+        solarPlant: 0,
+        fusionReactor: 0,
+        metalStorage: 0,
+        crystalStorage: 0,
+        deuteriumTank: 0,
+        shipyard: 0,
+      },
+    };
+    console.log("New planet colonized:", planet.basicInfo.planetName);
+    return planet;
+  }
+  else {
+    return console.error("Error colonizing planet");
+  }
+};
+
 module.exports = {
   updatePlanetResources,
   checkBuildingResourceCost,
   checkShipResourceCost,
+  colonizePlanet,
 };

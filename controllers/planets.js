@@ -177,7 +177,10 @@ const constructBuilding = async (req, res) => {
   planet = await simulation.updatePlanetResources(planet, galaxy);
 
   // Check if the planet has enough resources to construct the building
-  const totalCost = await simulation.checkBuildingResourceCost(planet, building);
+  const totalCost = await simulation.checkBuildingResourceCost(
+    planet,
+    building
+  );
   if (totalCost) {
     // Update the planet's resources
     updateQuery.$inc["resources.metal"] = -totalCost.metal;
@@ -278,8 +281,31 @@ const deletePlanet = async (req, res) => {
           },
         }
       );
-
+    let deleteUserPlanetRefResult;
     if (updateGalaxyResult.acknowledged) {
+      // Delete the planet reference from the user's profile
+      const user = await mongodb
+        .getDb()
+        .db("empire-command")
+        .collection("users")
+        .findOne({ _id: planet.basicInfo.owner });
+
+      deleteUserPlanetRefResult = await mongodb
+        .getDb()
+        .db("empire-command")
+        .collection("users")
+        .updateOne(
+          { _id: user._id },
+          {
+            $pull: {
+              "gameProfile.planetsOwned": planetId,
+            },
+          }
+        );
+    } else {
+      res.status(500).json("Failed to remove planet reference from galaxy.");
+    }
+    if (deleteUserPlanetRefResult.acknowledged) {
       // Delete the planet object
       const deletePlanetResult = await mongodb
         .getDb()
@@ -293,7 +319,9 @@ const deletePlanet = async (req, res) => {
         res.status(500).json("Failed to delete planet.");
       }
     } else {
-      res.status(500).json("Failed to update galaxy.");
+      res
+        .status(500)
+        .json("Failed to remove planet reference from user profile.");
     }
   } else {
     res.status(404).json("Planet not found.");

@@ -7,7 +7,16 @@ const userSchema = new Schema({
         type: String,
         required: true
     },
-    ownedPlanets: [{
+    email: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    galaxiesJoined: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Galaxy'
+    }],
+    planetsOwned: [{
         type: Schema.Types.ObjectId,
         ref: 'Planet'
     }],

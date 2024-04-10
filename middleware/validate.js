@@ -94,30 +94,14 @@ const createPlanet = async (req, res, next) => {
         error: err,
       });
     } else {
-      // Make sure the coordinates lead to a null planet index in the galaxy
       const galaxyId = new ObjectId(req.params.galaxyId);
-      const givenSystemIndex = parseInt(req.params.systemIndex);
-      const givenPlanetIndex = parseInt(req.params.planetIndex);
-      const galaxy = await mongodb
-        .getDb()
-        .db("empire-command")
-        .collection("galaxies")
-        .findOne({ _id: galaxyId });
-      if (galaxy) {
-        if (
-          galaxy.systems[givenSystemIndex] &&
-          galaxy.systems[givenSystemIndex][givenPlanetIndex] === null
-        ) {
-          next();
-        } else {
-          res
-            .status(412)
-            .json(
-              "Invalid coordinates. The coordinates may be out of bounds or already occupied."
-            );
-        }
-      } else {
-        res.status(404).json("Galaxy not found.");
+      const coordinates = {
+        systemIndex: req.params.systemIndex,
+        planetIndex: req.params.planetIndex,
+      };
+      const isOpen = await verifyEmptyCoordinates(res, galaxyId, coordinates);
+      if (isOpen) {
+        next();
       }
     }
   });
@@ -173,11 +157,124 @@ const constructShip = async (req, res, next) => {
   });
 };
 
+// Users
+
+const setNickname = async (req, res, next) => {
+  const rules = {
+    nickname: "required|string|min:3|max:20",
+  };
+  const customMessages = {
+    required: "The :attribute field is required.",
+  };
+  validator(req.body, rules, customMessages, async (err, status) => {
+    if (!status) {
+      res.status(412).json({
+        message: "Validation failed",
+        error: err,
+      });
+    } else {
+      const user = await mongodb
+        .getDb()
+        .db("empire-command")
+        .collection("users")
+        .findOne({ "gameProfile.nickname": req.body.nickname });
+
+      if (user) {
+        res.status(412).json({
+          message: "Validation failed",
+          error: { nickname: ["This nickname is already taken."] },
+        });
+      } else {
+        next();
+      }
+    }
+  });
+};
+
+const joinGalaxy = async (req, res, next) => {
+  const rules = {
+    galaxyId: "required|string",
+    "coordinates.systemIndex": "required|numeric",
+    "coordinates.planetIndex": "required|numeric",
+  };
+  const customMessages = {
+    required: "The :attribute field is required.",
+  };
+  validator(req.body, rules, customMessages, async (err, status) => {
+    if (!status) {
+      res.status(412).json({
+        message: "Validation failed",
+        error: err,
+      });
+    } else {
+      // Get the galaxy by ID
+      const galaxyId = new ObjectId(req.body.galaxyId);
+      const galaxy = await mongodb
+        .getDb()
+        .db("empire-command")
+        .collection("galaxies")
+        .findOne({ _id: galaxyId });
+
+      const isOpen = await verifyEmptyCoordinates(res, galaxyId, req.body.coordinates);
+      if (!isOpen) {
+        return;
+      }
+
+      // Check if the user is already in the galaxy
+      if (galaxy.users.includes(req.oidc.user.sub)) {
+        res.status(409).json({
+          message: "User is already in this galaxy.",
+        });
+        return;
+      }
+
+      next();
+    }
+  });
+};
+
+// Misc
+
+const verifyEmptyCoordinates = async (res, galaxyId, coordinates) => {
+  // Make sure the coordinates lead to a null planet index in the galaxy
+  const givenSystemIndex = parseInt(coordinates.systemIndex);
+  const givenPlanetIndex = parseInt(coordinates.planetIndex);
+  const galaxy = await mongodb
+    .getDb()
+    .db("empire-command")
+    .collection("galaxies")
+    .findOne({ _id: galaxyId });
+  if (galaxy) {
+    if (
+      galaxy.systems[givenSystemIndex] &&
+      galaxy.systems[givenSystemIndex][givenPlanetIndex] === null
+    ) {
+      return true;
+    } else {
+      res
+        .status(412)
+        .json(
+          "Invalid coordinates. The coordinates may be out of bounds or already occupied."
+        );
+      return false
+    }
+  } else {
+    res.status(404).json("Galaxy not found.");
+    return false;
+  }
+};
+
 module.exports = {
+  // Galaxies
   createGalaxy,
   updateGalaxyRulesById,
-
+  // Planets
   createPlanet,
   constructBuilding,
   constructShip,
+  // Users
+  setNickname,
+  joinGalaxy,
+  // Misc
+  verifyEmptyCoordinates,
 };

@@ -1,56 +1,54 @@
 const express = require('express');
 const router = express.Router();
-// const { requiresAuth } = require('express-openid-connect');
+const { auth, requiresAuth } = require('express-openid-connect');
 
 const controller = require('../controllers/users');
+const validate = require('../middleware/validate');
 
-// Route to get a user by ID
-router.get('/:id', controller.getUserById, (req, res) => {
+// Route to get a user's own game profile
+router.get('/me', requiresAuth(), controller.getCurrentUser, (req, res) => {
     /*
-    #swagger.summary = 'Get a user by ID.'
+    #swagger.summary = "Returns the logged in user's data including game profile."
     */
 });
 
-// Route to get a user by username
-router.get('/:username', controller.getUserByUsername, (req, res) => {
+// Route to get a user by nickname
+router.get('/:nickname', requiresAuth(), controller.getUserByNickname, (req, res) => {
     /*
-    #swagger.summary = 'Get a user by username.'
+    #swagger.summary = "Get a user's gameProfile by nickname."
     */
 });
 
-// Route to login
-router.post('/login', controller.login, (req, res) => {
+// Route to set a user's own nickname
+router.put('/change-nickname', requiresAuth(), validate.setNickname, controller.setNickname, (req, res) => {
     /*
-    #swagger.summary = 'Login a user.'
-        #swagger.parameters['body'] = {
+    #swagger.summary = "Set the current user's own nickname."
+    #swagger.parameters['obj'] = {
         in: 'body',
         schema: {
-            $ref: '#/definitions/User',
+            nickname: 'New Nickname',
         }
     }
     */
 });
 
-// Route to logout
-router.post('/logout', controller.logout, (req, res) => {
+// Route to join a galaxy as the current logged in user
+router.put('/join-galaxy', requiresAuth(), validate.joinGalaxy, controller.joinGalaxy, (req, res) => {
     /*
-    #swagger.summary = 'Logout a user.'
-    */
-});
-
-// Route to register
-router.post('/register', controller.register, (req, res) => {
-    /*
-    #swagger.summary = 'Register a new user.'
-        #swagger.parameters['body'] = {
+    #swagger.summary = "Join a galaxy as the current user."
+    #swagger.parameters['obj'] = {
+        description: 'Places a starting planet at the given coordinates.',
         in: 'body',
         schema: {
-            $ref: '#/definitions/User',
+            galaxyId: 'Galaxy ID',
+            coordinates: {
+                systemIndex: 0,
+                planetIndex: 0
+            }
         }
     }
     */
 });
-
 
 module.exports = router;
 

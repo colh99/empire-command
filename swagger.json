@@ -223,106 +223,122 @@
         }
       }
     },
-    "/users/{id}": {
+    "/users/me": {
       "get": {
         "tags": [
           "Users"
         ],
-        "summary": "Get a user by ID.",
+        "summary": "Returns the logged in user's data including game profile.",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/users/{nickname}": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get a user's gameProfile by nickname.",
         "description": "",
         "parameters": [
           {
-            "name": "id",
+            "name": "nickname",
             "in": "path",
             "required": true,
             "type": "string"
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "OK"
           }
         }
       }
     },
-    "/users/{username}": {
-      "get": {
+    "/users/change-nickname": {
+      "put": {
         "tags": [
           "Users"
         ],
-        "summary": "Get a user by username.",
+        "summary": "Set the current user's own nickname.",
         "description": "",
         "parameters": [
           {
-            "name": "username",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/users/login": {
-      "post": {
-        "tags": [
-          "Users"
-        ],
-        "summary": "Login a user.",
-        "description": "",
-        "parameters": [
-          {
-            "name": "body",
+            "name": "obj",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/User"
+              "type": "object",
+              "properties": {
+                "nickname": {
+                  "type": "string",
+                  "example": "New Nickname"
+                }
+              }
             }
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "OK"
+          },
+          "412": {
+            "description": "Precondition Failed"
           }
         }
       }
     },
-    "/users/logout": {
-      "post": {
+    "/users/join-galaxy": {
+      "put": {
         "tags": [
           "Users"
         ],
-        "summary": "Logout a user.",
-        "description": "",
-        "responses": {
-          "default": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/users/register": {
-      "post": {
-        "tags": [
-          "Users"
-        ],
-        "summary": "Register a new user.",
+        "summary": "Join a galaxy as the current user.",
         "description": "",
         "parameters": [
           {
-            "name": "body",
+            "name": "obj",
+            "description": "Places a starting planet at the given coordinates.",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/User"
+              "type": "object",
+              "properties": {
+                "galaxyId": {
+                  "type": "string",
+                  "example": "Galaxy ID"
+                },
+                "coordinates": {
+                  "type": "object",
+                  "properties": {
+                    "systemIndex": {
+                      "type": "number",
+                      "example": 0
+                    },
+                    "planetIndex": {
+                      "type": "number",
+                      "example": 0
+                    }
+                  }
+                }
+              }
             }
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "OK"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "412": {
+            "description": "Precondition Failed"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
@@ -402,9 +418,6 @@
         "responses": {
           "201": {
             "description": "Created"
-          },
-          "404": {
-            "description": "Not Found"
           },
           "412": {
             "description": "Precondition Failed"
