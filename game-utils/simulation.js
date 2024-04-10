@@ -206,9 +206,65 @@ const colonizePlanet = async (user, galaxy, coordinates) => {
   }
 };
 
+/**
+ * Determines the time it will take for a fleet to reach its target.
+ * @param  {[object]} origin The origin planet object
+ * @param  {[object]} target The target planet object
+ * @param  {[object]} fleet The fleet object
+ * @return {[object]} Returns the time in hours it will take for the fleet to reach its target
+ * @async
+ */
+const determineTravelTime =  async (origin, target, fleet) => {
+  if (origin && target && fleet) {
+    console.log("--DETERMINE TRAVEL TIME");
+    console.log("Origin:", origin.basicInfo);
+    console.log("Target:", target.basicInfo);
+    // Determine the distance between the origin and target
+    const systemDistance = Math.abs(target.basicInfo.coordinates.systemIndex - origin.basicInfo.coordinates.systemIndex);
+    const planetDistance = Math.abs(target.basicInfo.coordinates.planetIndex - origin.basicInfo.coordinates.planetIndex);
+    distance = systemDistance + planetDistance;
+    console.log("Distance:", distance);
+
+    // Find the slowest ship in the fleet
+    let speed;
+    for (const ship in fleet) {
+      if (fleet[ship] > 0) {
+        speed = shipData[ship].speed;
+        break;
+      }
+    }
+    if (speed === undefined) {
+      return console.error("No valid ships in the fleet.");
+    }
+
+    for (const ship in fleet) {
+      if (fleet[ship] > 0 && shipData[ship].speed < speed) {
+        speed = shipData[ship].speed;
+      }
+    }
+  
+    // Get speed modifier from galaxy rules
+    const galaxy = await mongodb
+      .getDb()
+      .db("empire-command")
+      .collection("galaxies")
+      .findOne({ _id: origin.galaxyId });
+
+    const speedModifer = galaxy.rulesConfig.GAME_OVERALL_SPEED * galaxy.rulesConfig.TRAVEL_SPEED;
+    
+    console.log("Speed:", speed);
+    // Determine the time it will take for the fleet to reach its target
+    const hoursTravelTime = distance / (speed * speedModifer);
+    console.log("Hours travel time:", hoursTravelTime);
+    return hoursTravelTime;
+  }
+};
+
+
 module.exports = {
   updatePlanetResources,
   checkBuildingResourceCost,
   checkShipResourceCost,
   colonizePlanet,
+  determineTravelTime,
 };

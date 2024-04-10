@@ -1,6 +1,6 @@
 {
     "battleCruiser": {
-        "speed": 100,
+        "speed": 2,
         "fuelConsumption": 150,
         "cargo": 800,
         "attackPower": 100,
@@ -11,7 +11,7 @@
         }
     },
     "smallCargo": {
-        "speed": 400,
+        "speed": 5,
         "fuelConsumption": 50,
         "cargo": 5000,
         "attackPower": 10,
@@ -22,7 +22,7 @@
         }
     },
     "largeCargo": {
-        "speed": 200,
+        "speed": 3,
         "fuelConsumption": 100,
         "cargo": 25000,
         "attackPower": 15,
@@ -33,7 +33,7 @@
         }
     },
     "espionageProbe": {
-        "speed": 100000000,
+        "speed": 1000,
         "fuelConsumption": 1,
         "cargo": 0,
         "attackPower": 0,
@@ -44,7 +44,7 @@
         }
     },
     "recycler": {
-        "speed": 200,
+        "speed": 3,
         "fuelConsumption": 100,
         "cargo": 20000,
         "attackPower": 10,

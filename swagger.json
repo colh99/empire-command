@@ -646,79 +646,22 @@
         }
       }
     },
-    "/missions/{id}": {
+    "/missions/my-missions": {
       "get": {
         "tags": [
           "Missions"
         ],
-        "summary": "Get a mission by ID.",
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": ""
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "Missions"
-        ],
-        "summary": "Delete a mission by ID (If still in transit, fleet and cargo will be lost!).",
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/missions/": {
-      "get": {
-        "tags": [
-          "Missions"
-        ],
-        "summary": "Get all active missions.",
+        "summary": "Get all active missions from the current user.",
         "description": "",
         "responses": {
-          "default": {
-            "description": ""
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Missions"
-        ],
-        "summary": "Create a new mission.",
-        "description": "",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "$ref": "#/definitions/Mission"
-            }
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
@@ -739,8 +682,133 @@
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "OK"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/missions/{id}": {
+      "get": {
+        "tags": [
+          "Missions"
+        ],
+        "summary": "Get a mission by ID.",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Missions"
+        ],
+        "summary": "Create a new mission from the origin planet's ID.",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/Mission"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Missions"
+        ],
+        "summary": "Delete a mission by ID (If still in transit, fleet and cargo will be lost!).",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/missions/": {
+      "get": {
+        "tags": [
+          "Missions"
+        ],
+        "summary": "Get all active missions.",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
@@ -895,34 +963,9 @@
     "Mission": {
       "type": "object",
       "properties": {
-        "commandingUser": {
-          "type": "string",
-          "example": "ObjectId"
-        },
-        "originPlanet": {
-          "type": "string",
-          "example": "ObjectId"
-        },
         "targetPlanet": {
           "type": "string",
           "example": "ObjectId"
-        },
-        "departureTime": {
-          "type": "function"
-        },
-        "arrivalTime": {
-          "type": "function"
-        },
-        "returnTime": {
-          "type": "function"
-        },
-        "active": {
-          "type": "boolean",
-          "example": true
-        },
-        "status": {
-          "type": "string",
-          "example": "en route"
         },
         "missionType": {
           "type": "string",
