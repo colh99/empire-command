@@ -215,7 +215,11 @@ const joinGalaxy = async (req, res, next) => {
         .collection("galaxies")
         .findOne({ _id: galaxyId });
 
-      const isOpen = await verifyEmptyCoordinates(res, galaxyId, req.body.coordinates);
+      const isOpen = await verifyEmptyCoordinates(
+        res,
+        galaxyId,
+        req.body.coordinates
+      );
       if (!isOpen) {
         return;
       }
@@ -256,11 +260,43 @@ const verifyEmptyCoordinates = async (res, galaxyId, coordinates) => {
         .json(
           "Invalid coordinates. The coordinates may be out of bounds or already occupied."
         );
-      return false
+      return false;
     }
   } else {
     res.status(404).json("Galaxy not found.");
     return false;
+  }
+};
+
+const requiresAdmin = async (req, res, next) => {
+  const user = await mongodb
+    .getDb()
+    .db("empire-command")
+    .collection("users")
+    .findOne({ _id: req.oidc.user.sub });
+
+  if (user && user.isAdmin) {
+    next();
+  } else {
+    res.status(403).json({
+      message: "You must be an admin to access this resource.",
+    });
+  }
+};
+
+const requiresPlanetOwnership = async (req, res, next) => {
+  const planetId = new ObjectId(req.params.id);
+  const planet = await mongodb
+    .getDb()
+    .db("empire-command")
+    .collection("planets")
+    .findOne({ _id: planetId });
+  if (planet && planet.basicInfo.owner === req.oidc.user.sub) {
+    next();
+  } else {
+    res.status(403).json({
+      message: "You do not own this planet.",
+    });
   }
 };
 
@@ -277,4 +313,6 @@ module.exports = {
   joinGalaxy,
   // Misc
   verifyEmptyCoordinates,
+  requiresAdmin,
+  requiresPlanetOwnership,
 };

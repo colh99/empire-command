@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-// const { requiresAuth } = require('express-openid-connect');
 
 const validate = require('../middleware/validate');
 const controller = require('../controllers/galaxies');
@@ -14,7 +13,7 @@ router.get('/:id/rules', controller.getGalaxyRulesById, (req, res) => {
 });
 
 // Route to get a galaxy's array of all users by ID
-router.get('/:id/users', controller.getGalaxyUsersById, (req, res) => {
+router.get('/:id/users', validate.requiresAdmin, controller.getGalaxyUsersById, (req, res) => {
     /*
     #swagger.summary = 'Get the array of all users in a galaxy by ID.
     */
@@ -35,7 +34,7 @@ router.get('/:id/:systemIndex', controller.getGalaxySystemByNumber, (req, res) =
 });
 
 // Route to create a new galaxy
-router.post('/', validate.createGalaxy, controller.createGalaxy, (req, res) => {
+router.post('/', validate.requiresAdmin, validate.createGalaxy, controller.createGalaxy, (req, res) => {
     /*
     #swagger.summary = 'Create a new galaxy.'
         #swagger.parameters['body'] = {
@@ -48,7 +47,7 @@ router.post('/', validate.createGalaxy, controller.createGalaxy, (req, res) => {
 });
 
 // Route to update a galaxy's rules by ID
-router.put('/:id/rules', validate.updateGalaxyRulesById, controller.updateGalaxyRulesById, (req, res) => {
+router.put('/:id/rules', validate.requiresAdmin, validate.updateGalaxyRulesById, controller.updateGalaxyRulesById, (req, res) => {
     /*
     #swagger.summary = 'Update galaxy rules by ID.'
         #swagger.parameters['body'] = {
@@ -61,7 +60,7 @@ router.put('/:id/rules', validate.updateGalaxyRulesById, controller.updateGalaxy
 });
 
 // Route to delete a galaxy
-router.delete('/:id', controller.deleteGalaxy, (req, res) => {
+router.delete('/:id', validate.requiresAdmin, controller.deleteGalaxy, (req, res) => {
     /*
     #swagger.summary = 'Delete a galaxy by ID.'
     */

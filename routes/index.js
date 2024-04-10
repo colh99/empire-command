@@ -1,8 +1,13 @@
 const express = require('express');
 const router = express.Router();
+const { requiresAuth } = require('express-openid-connect');
+
 
 // Routes
 router.use('/', require('./swagger') /*  #swagger.ignore = true */);
+
+// Require authentication for all routes past this point
+router.use(requiresAuth());
 
 // Galaxies
 router.use('/galaxies', require('./galaxies') /*  #swagger.tags = ['Galaxies']  */);

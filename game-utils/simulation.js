@@ -149,6 +149,14 @@ const checkShipResourceCost = async (planet, ship) => {
   }
 };
 
+/**
+ * Colonizes a planet for a user in a galaxy at the given coordinates.
+ * @param  {[object]} user The user object to give the planet to
+ * @param  {[object]} galaxy The galaxy object to place the planet in
+ * @param  {[object]} coordinates The coordinates of the planet in the galaxy
+ * @return {[object]} Returns the new planet object
+ * @async
+ */
 const colonizePlanet = async (user, galaxy, coordinates) => {
   if (user && galaxy && coordinates) {
     console.log("--COLONIZE PLANET");
