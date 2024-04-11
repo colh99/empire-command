@@ -22,34 +22,6 @@ app.use(auth(config));
 
 // req.isAuthenticated is provided from the auth router
 app.get("/", async (req, res) => {
-  // Add user to MongoDB if authenticated
-  if (req.oidc.isAuthenticated()) {
-    const userProfile = req.oidc.user;
-
-    // Check if user exists in MongoDB
-    let user = await mongodb
-      .getDb()
-      .db("empire-command")
-      .collection("users")
-      .findOne({ _id: userProfile.sub });
-
-    // If user doesn't exist, create a new user
-    if (!user) {
-      user = await mongodb
-        .getDb()
-        .db("empire-command")
-        .collection("users")
-        .insertOne({
-          _id: userProfile.sub,
-          email: userProfile.email,
-          gameProfile: {
-            nickname: userProfile.nickname,
-            galaxiesJoined: [],
-            planetsOwned: [],
-          },
-        });
-    }
-  }
   res.send(req.oidc.isAuthenticated() ? "Logged in" : "Logged out");
 });
 

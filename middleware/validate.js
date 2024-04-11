@@ -159,6 +159,51 @@ const constructShip = async (req, res, next) => {
 
 // Users
 
+const createUser = async (req, res, next) => {
+  const rules = {
+    nickname: "required|string|min:3|max:20",
+  };
+  const customMessages = {
+    required: "The :attribute field is required.",
+  };
+  validator(req.body, rules, customMessages, async (err, status) => {
+    if (!status) {
+      res.status(412).json({
+        message: "Validation failed",
+        error: err,
+      });
+    } else {
+      // Check if the user authenticated with Auth0 has a profile in the database
+      const user = await mongodb
+        .getDb()
+        .db("empire-command")
+        .collection("users")
+        .findOne({ _id: req.oidc.user.sub });
+      if (user) {
+        res.status(412).json({
+          message: "Validation failed",
+          error: { nickname: ["You already have a profile."] },
+        });
+      } else {
+        // Check if the nickname is already taken
+        const user = await mongodb
+          .getDb()
+          .db("empire-command")
+          .collection("users")
+          .findOne({ "gameProfile.nickname": req.body.nickname });
+        if (user) {
+          res.status(412).json({
+            message: "Validation failed",
+            error: { nickname: ["This nickname is already taken."] },
+          });
+        } else {
+          next();
+        }
+      }
+    }
+  });
+};
+
 const setNickname = async (req, res, next) => {
   const rules = {
     nickname: "required|string|min:3|max:20",
@@ -325,6 +370,21 @@ const requiresAdmin = async (req, res, next) => {
   }
 };
 
+const requiresUserExists = async (req, res, next) => {
+  const user = await mongodb
+    .getDb()
+    .db("empire-command")
+    .collection("users")
+    .findOne({ _id: req.oidc.user.sub });
+  if (user) {
+    next();
+  } else {
+    res.status(404).json({
+      message: "You are logged in, but have not created a profile.",
+    });
+  }
+};
+
 const requiresPlanetOwnership = async (req, res, next) => {
   const planetId = new ObjectId(req.params.planet_id);
   const planet = await mongodb
@@ -366,6 +426,7 @@ module.exports = {
   constructBuilding,
   constructShip,
   // Users
+  createUser,
   setNickname,
   joinGalaxy,
   // Missions
@@ -373,6 +434,7 @@ module.exports = {
   // Misc
   verifyEmptyCoordinates,
   requiresAdmin,
+  requiresUserExists,
   requiresPlanetOwnership,
   requiresMissionOwnership,
 };

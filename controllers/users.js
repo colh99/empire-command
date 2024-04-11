@@ -38,6 +38,33 @@ const getUserByNickname = async (req, res) => {
   }
 };
 
+// Create a new user as the current authenticated user
+const createUser = async (req, res) => {
+  // Create a new user object
+  const user = {
+    _id: req.oidc.user.sub,
+    gameProfile: {
+      nickname: req.body.nickname,
+      planetsOwned: [],
+      galaxiesJoined: [],
+    },
+    isAdmin: false,
+  };
+
+  // Insert the new user into the database
+  let newUser = await mongodb
+    .getDb()
+    .db("empire-command")
+    .collection("users")
+    .insertOne(user);
+
+  if (newUser) {
+    res.send("User created successfully.");
+  } else {
+    res.send("User creation failed.");
+  }
+};
+
 // Set a user's own nickname
 const setNickname = async (req, res) => {
   nickname = req.body.nickname;
@@ -120,9 +147,13 @@ const joinGalaxy = async (req, res) => {
   }
 
   // Update the user's galaxiesJoined and planetsOwned
- if (!user.gameProfile.galaxiesJoined.map(id => id.toString()).includes(galaxyId.toString())) {
-  user.gameProfile.galaxiesJoined.push(galaxyId);
-}
+  if (
+    !user.gameProfile.galaxiesJoined
+      .map((id) => id.toString())
+      .includes(galaxyId.toString())
+  ) {
+    user.gameProfile.galaxiesJoined.push(galaxyId);
+  }
   user.gameProfile.planetsOwned.push(planetId);
   const userUpdate = await mongodb
     .getDb()
@@ -141,9 +172,62 @@ const joinGalaxy = async (req, res) => {
   }
 };
 
+// Delete a user's own account
+const deleteAccount = async (req, res) => {
+  // Find the current logged in user in the database
+  let user = await mongodb
+    .getDb()
+    .db("empire-command")
+    .collection("users")
+    .findOne({ _id: req.oidc.user.sub });
+
+  // Remove the user reference from all planets owned
+  let planetsUpdate = await mongodb
+    .getDb()
+    .db("empire-command")
+    .collection("planets")
+    .updateMany(
+      { _id: { $in: user.gameProfile.planetsOwned } },
+      { $unset: { owner: "" } }
+    );
+
+  if (!planetsUpdate) {
+    res.send("Failed to remove user from planets.");
+  }
+
+  // Remove the user reference from all galaxies joined
+  let galaxiesUpdate = await mongodb
+    .getDb()
+    .db("empire-command")
+    .collection("galaxies")
+    .updateMany(
+      { _id: { $in: user.gameProfile.galaxiesJoined } },
+      { $pull: { users: user._id } }
+    );
+
+  if (!galaxiesUpdate) {
+    res.send("Failed to remove user from galaxies.");
+  }
+
+  // Delete the user from the database
+  let userDelete = await mongodb
+    .getDb()
+    .db("empire-command")
+    .collection("users")
+    .deleteOne({ _id: req.oidc.user.sub });
+
+  if (userDelete) {
+    res.send("User deleted successfully.");
+  } else {
+    res.send("User deletion failed.");
+  }
+};
+
 module.exports = {
   getCurrentUser,
   getUserByNickname,
+  createUser,
   setNickname,
   joinGalaxy,
+  deleteAccount,
 };

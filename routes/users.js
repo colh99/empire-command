@@ -49,6 +49,13 @@ router.put('/join-galaxy', validate.joinGalaxy, controller.joinGalaxy, (req, res
     */
 });
 
+// Route to delete a user's own account
+router.delete('/delete-account', controller.deleteAccount, (req, res) => {
+    /*
+    #swagger.summary = "Delete the current user's account."
+    */
+});
+
 module.exports = router;
 
 
