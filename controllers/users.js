@@ -102,8 +102,10 @@ const joinGalaxy = async (req, res) => {
   // Add the planet ID to the galaxy in the correct coordinates
   galaxy.systems[coordinates.systemIndex][coordinates.planetIndex] = planetId;
 
-  // Add the user to the galaxy
-  galaxy.users.push(user._id);
+  // If the user isn't already, add the user to the galaxy
+  if (!galaxy.users.includes(user._id)) {
+    galaxy.users.push(user._id);
+  }
 
   // Update the galaxy in the database
   const galaxyUpdate = await mongodb
@@ -118,7 +120,9 @@ const joinGalaxy = async (req, res) => {
   }
 
   // Update the user's galaxiesJoined and planetsOwned
+ if (!user.gameProfile.galaxiesJoined.map(id => id.toString()).includes(galaxyId.toString())) {
   user.gameProfile.galaxiesJoined.push(galaxyId);
+}
   user.gameProfile.planetsOwned.push(planetId);
   const userUpdate = await mongodb
     .getDb()

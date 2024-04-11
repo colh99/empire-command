@@ -200,8 +200,7 @@ const colonizePlanet = async (user, galaxy, coordinates) => {
     };
     console.log("New planet colonized:", planet.basicInfo.planetName);
     return planet;
-  }
-  else {
+  } else {
     return console.error("Error colonizing planet");
   }
 };
@@ -214,14 +213,20 @@ const colonizePlanet = async (user, galaxy, coordinates) => {
  * @return {[object]} Returns the time in hours it will take for the fleet to reach its target
  * @async
  */
-const determineTravelTime =  async (origin, target, fleet) => {
+const determineTravelTime = async (origin, target, fleet) => {
   if (origin && target && fleet) {
     console.log("--DETERMINE TRAVEL TIME");
     console.log("Origin:", origin.basicInfo);
     console.log("Target:", target.basicInfo);
     // Determine the distance between the origin and target
-    const systemDistance = Math.abs(target.basicInfo.coordinates.systemIndex - origin.basicInfo.coordinates.systemIndex);
-    const planetDistance = Math.abs(target.basicInfo.coordinates.planetIndex - origin.basicInfo.coordinates.planetIndex);
+    const systemDistance = Math.abs(
+      target.basicInfo.coordinates.systemIndex -
+        origin.basicInfo.coordinates.systemIndex
+    );
+    const planetDistance = Math.abs(
+      target.basicInfo.coordinates.planetIndex -
+        origin.basicInfo.coordinates.planetIndex
+    );
     distance = systemDistance + planetDistance;
     console.log("Distance:", distance);
 
@@ -242,7 +247,7 @@ const determineTravelTime =  async (origin, target, fleet) => {
         speed = shipData[ship].speed;
       }
     }
-  
+
     // Get speed modifier from galaxy rules
     const galaxy = await mongodb
       .getDb()
@@ -250,8 +255,9 @@ const determineTravelTime =  async (origin, target, fleet) => {
       .collection("galaxies")
       .findOne({ _id: origin.galaxyId });
 
-    const speedModifer = galaxy.rulesConfig.GAME_OVERALL_SPEED * galaxy.rulesConfig.TRAVEL_SPEED;
-    
+    const speedModifer =
+      galaxy.rulesConfig.GAME_OVERALL_SPEED * galaxy.rulesConfig.TRAVEL_SPEED;
+
     console.log("Speed:", speed);
     // Determine the time it will take for the fleet to reach its target
     const hoursTravelTime = distance / (speed * speedModifer);
@@ -260,6 +266,95 @@ const determineTravelTime =  async (origin, target, fleet) => {
   }
 };
 
+/**
+ * Adjusts the resources and fleet of the origin planet based on the mission parameters.
+ * @param  {[object]} origin The origin planet object
+ * @param  {[object]} mission The mission object
+ * @return {[object]} Returns true if the mission parameters are valid, otherwise returns an error message
+ * @async
+ */
+const launchFleet = async (origin, mission) => {
+  if (origin && mission) {
+    console.log("--LAUNCH FLEET");
+    // Make sure the planet has enough of each ship to send on the mission
+    for (const ship in mission.fleet) {
+      if (origin.fleet[ship] < mission.fleet[ship]) {
+        return {
+          status: 400,
+          message: {
+            message:
+              "The origin planet does not enough ships of the correct type.",
+            ship: ship,
+            available: origin.fleet[ship],
+            requested: mission.fleet[ship],
+          },
+        };
+      }
+    }
+
+    // Make sure the planet has enough resources to send on the mission
+    for (const resource in mission.cargo) {
+      if (origin.resources[resource] < mission.cargo[resource]) {
+        return {
+          status: 400,
+          message: {
+            message: "The origin planet does not have that many resources.",
+            resource: resource,
+            originResources: origin.resources[resource],
+            requestedResources: mission.cargo[resource],
+          },
+        };
+      }
+    }
+
+    // Make sure the total cargo capacity of the mission fleet is enough to carry the total resources
+    let totalCargoCapacity = 0;
+    for (const ship in mission.fleet) {
+      totalCargoCapacity += shipData[ship].cargo * mission.fleet[ship];
+    }
+    const totalResources =
+      mission.cargo.metal + mission.cargo.crystal + mission.cargo.deuterium;
+
+    console.log("Total cargo capacity:", totalCargoCapacity);
+    console.log("Total resources:", totalResources);
+    if (totalCargoCapacity < totalResources) {
+      return {
+        status: 400,
+        message: {
+          message:
+            "The mission fleet does not have enough cargo capacity to carry the resources.",
+          totalCargoCapacity: totalCargoCapacity,
+          requestedResources: totalResources,
+        },
+      };
+    }
+    // Adjust the resources of the origin planet
+    const updatedResources = {
+      metal: origin.resources.metal - mission.cargo.metal,
+      crystal: origin.resources.crystal - mission.cargo.crystal,
+      deuterium: origin.resources.deuterium - mission.cargo.deuterium,
+    };
+    // Adjust the fleet of the origin planet
+    const updatedFleet = {};
+    for (const ship in mission.fleet) {
+      updatedFleet[ship] = origin.fleet[ship] - mission.fleet[ship];
+    }
+
+    // Update the origin planet
+    await mongodb
+      .getDb()
+      .db("empire-command")
+      .collection("planets")
+      .updateOne(
+        { _id: origin._id },
+        {
+          $set: { resources: updatedResources, fleet: updatedFleet },
+        }
+      );
+    console.log("Succesfully Launched. Planet updated.");
+    return true;
+  }
+};
 
 module.exports = {
   updatePlanetResources,
@@ -267,4 +362,5 @@ module.exports = {
   checkShipResourceCost,
   colonizePlanet,
   determineTravelTime,
+  launchFleet,
 };

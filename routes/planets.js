@@ -13,7 +13,7 @@ router.get('/:galaxyId/:systemIndex/:planetIndex', controller.getPlanetByCoordin
 });
 
 // Route to get a planet by ID
-router.get('/:id', controller.getPlanetById, (req, res) => {
+router.get('/:planet_id', controller.getPlanetById, (req, res) => {
     /*
     #swagger.summary = 'Get a planet by ID.'
     */
@@ -33,7 +33,7 @@ router.post('/:galaxyId/:systemIndex/:planetIndex', validate.requiresAdmin, vali
 });
 
 // Route to rename a planet
-router.put('/:id/rename', validate.requiresPlanetOwnership, controller.renamePlanet, (req, res) => {
+router.put('/:planet_id/rename', validate.requiresPlanetOwnership, controller.renamePlanet, (req, res) => {
     /*
     #swagger.summary = 'Rename the planet by ID.'
         #swagger.parameters['body'] = {
@@ -46,7 +46,7 @@ router.put('/:id/rename', validate.requiresPlanetOwnership, controller.renamePla
 });
 
 // Route to build on a planet
-router.put('/:id/construct-building', validate.requiresPlanetOwnership, validate.constructBuilding, controller.constructBuilding, (req, res) => {
+router.put('/:planet_id/construct-building', validate.requiresPlanetOwnership, validate.constructBuilding, controller.constructBuilding, (req, res) => {
     /*
     #swagger.summary = 'Construct or upgrade a building.'
         #swagger.parameters['body'] = {
@@ -60,7 +60,7 @@ router.put('/:id/construct-building', validate.requiresPlanetOwnership, validate
 });
 
 // Route to construct a ship on a planet
-router.put('/:id/construct-ship', validate.requiresPlanetOwnership, validate.constructShip, controller.constructShip, (req, res) => {
+router.put('/:planet_id/construct-ship', validate.requiresPlanetOwnership, validate.constructShip, controller.constructShip, (req, res) => {
     /*
     #swagger.summary = 'Construct a ship to be added to the planet fleet.'
         #swagger.parameters['body'] = {
@@ -77,7 +77,7 @@ router.put('/:id/construct-ship', validate.requiresPlanetOwnership, validate.con
 });
 
 // Route to DELETE a planet by ID
-router.delete('/:id', validate.requiresAdmin, controller.deletePlanet, (req, res) => {
+router.delete('/:planet_id', validate.requiresAdmin, controller.deletePlanet, (req, res) => {
     /*
     #swagger.summary = 'Delete a planet by ID.'
     */

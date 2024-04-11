@@ -343,9 +343,6 @@
           "200": {
             "description": "OK"
           },
-          "409": {
-            "description": "Conflict"
-          },
           "412": {
             "description": "Precondition Failed"
           },
@@ -443,7 +440,7 @@
         }
       }
     },
-    "/planets/{id}": {
+    "/planets/{planet_id}": {
       "get": {
         "tags": [
           "Planets"
@@ -452,7 +449,7 @@
         "description": "",
         "parameters": [
           {
-            "name": "id",
+            "name": "planet_id",
             "in": "path",
             "required": true,
             "type": "string"
@@ -478,7 +475,7 @@
         "description": "",
         "parameters": [
           {
-            "name": "id",
+            "name": "planet_id",
             "in": "path",
             "required": true,
             "type": "string"
@@ -500,7 +497,7 @@
         }
       }
     },
-    "/planets/{id}/rename": {
+    "/planets/{planet_id}/rename": {
       "put": {
         "tags": [
           "Planets"
@@ -509,7 +506,7 @@
         "description": "",
         "parameters": [
           {
-            "name": "id",
+            "name": "planet_id",
             "in": "path",
             "required": true,
             "type": "string"
@@ -541,7 +538,7 @@
         }
       }
     },
-    "/planets/{id}/construct-building": {
+    "/planets/{planet_id}/construct-building": {
       "put": {
         "tags": [
           "Planets"
@@ -550,7 +547,7 @@
         "description": "",
         "parameters": [
           {
-            "name": "id",
+            "name": "planet_id",
             "in": "path",
             "required": true,
             "type": "string"
@@ -589,7 +586,7 @@
         }
       }
     },
-    "/planets/{id}/construct-ship": {
+    "/planets/{planet_id}/construct-ship": {
       "put": {
         "tags": [
           "Planets"
@@ -598,7 +595,7 @@
         "description": "",
         "parameters": [
           {
-            "name": "id",
+            "name": "planet_id",
             "in": "path",
             "required": true,
             "type": "string"
@@ -727,42 +724,6 @@
           }
         }
       },
-      "post": {
-        "tags": [
-          "Missions"
-        ],
-        "summary": "Create a new mission from the origin planet's ID.",
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "$ref": "#/definitions/Mission"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Created"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      },
       "delete": {
         "tags": [
           "Missions"
@@ -813,7 +774,48 @@
         }
       }
     },
-    "/missions/{id}/recall": {
+    "/missions/{planet_id}": {
+      "post": {
+        "tags": [
+          "Missions"
+        ],
+        "summary": "Create a new mission from the origin planet's ID.",
+        "description": "",
+        "parameters": [
+          {
+            "name": "planet_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/Mission"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "412": {
+            "description": "Precondition Failed"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/missions/{mission_id}/recall": {
       "put": {
         "tags": [
           "Missions"
@@ -822,15 +824,27 @@
         "description": "",
         "parameters": [
           {
-            "name": "id",
+            "name": "mission_id",
             "in": "path",
             "required": true,
             "type": "string"
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }

@@ -45,7 +45,7 @@ const getPlanetByCoordinates = async (req, res) => {
 // Get a single planet's info by ID
 const getPlanetById = async (req, res) => {
   try {
-    const planetId = new ObjectId(req.params.id);
+    const planetId = new ObjectId(req.params.planet_id);
     const planet = await mongodb
       .getDb()
       .db("empire-command")
@@ -132,7 +132,7 @@ const createPlanet = async (req, res) => {
 
 // Rename a planet
 const renamePlanet = async (req, res) => {
-  const planetId = new ObjectId(req.params.id);
+  const planetId = new ObjectId(req.params.planet_id);
   const newName = req.body.planetName;
   const result = await mongodb
     .getDb()
@@ -156,7 +156,7 @@ const renamePlanet = async (req, res) => {
 
 // Construct a building on a planet
 const constructBuilding = async (req, res) => {
-  const planetId = new ObjectId(req.params.id);
+  const planetId = new ObjectId(req.params.planet_id);
   const building = req.body.building;
   const updateQuery = { $inc: {} };
 
@@ -208,7 +208,7 @@ const constructBuilding = async (req, res) => {
 
 // Construct ships of a given type on a planet
 const constructShip = async (req, res) => {
-  const planetId = new ObjectId(req.params.id);
+  const planetId = new ObjectId(req.params.planet_id);
   const ship = req.body.ship;
   const updateQuery = { $inc: {} };
 
@@ -257,7 +257,7 @@ const constructShip = async (req, res) => {
 
 // Delete a planet. This means removing the planet reference from the galaxy according to the planet coordinates and deleting the planet object.
 const deletePlanet = async (req, res) => {
-  const planetId = new ObjectId(req.params.id);
+  const planetId = new ObjectId(req.params.planet_id);
   const planet = await mongodb
     .getDb()
     .db("empire-command")

@@ -33,7 +33,7 @@ router.get('/', validate.requiresAdmin, controller.getActiveMissions, (req, res)
 });
 
 // Route to create a new mission from the origin planet's ID
-router.post('/:id', validate.requiresPlanetOwnership, controller.createMission, (req, res) => {
+router.post('/:planet_id', validate.requiresPlanetOwnership, validate.createMission, controller.createMission, (req, res) => {
     /*
     #swagger.summary = "Create a new mission from the origin planet's ID."
         #swagger.parameters['body'] = {
@@ -45,8 +45,8 @@ router.post('/:id', validate.requiresPlanetOwnership, controller.createMission, 
     */
 });
 
-// Route to recall a mission by ID
-router.put('/:id/recall', controller.recallMission, (req, res) => {
+// Route to recall a mission by planet ID and mission ID
+router.put('/:mission_id/recall', validate.requiresMissionOwnership, controller.recallMission, (req, res) => {
     /*
     #swagger.summary = 'Recall a mission to the origin planet (before it reaches the destination) by ID.'
     */

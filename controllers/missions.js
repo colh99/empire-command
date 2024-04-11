@@ -91,7 +91,7 @@ const getActiveMissionsByCurrentUser = async (req, res) => {
 // Create a new mission
 const createMission = async (req, res) => {
   try {
-    const originPlanetId = new ObjectId(req.params.id);
+    const originPlanetId = new ObjectId(req.params.planet_id);
     const originPlanet = await mongodb
       .getDb()
       .db("empire-command")
@@ -135,6 +135,32 @@ const createMission = async (req, res) => {
       console.log("Arrival time:", mission.arrivalTime.toLocaleString());
       console.log("Return time:", mission.returnTime.toLocaleString());
 
+      // Get the galaxy for the origin planet
+      const galaxy = await mongodb
+        .getDb()
+        .db("empire-command")
+        .collection("galaxies")
+        .findOne({ _id: originPlanet.galaxyId });
+
+      // Update the origin planet's resources
+      planet = simulation.updatePlanetResources(originPlanet, galaxy);
+      // Check if the mission parameters are valid
+      const isFleetLaunched = await simulation.launchFleet(originPlanet, mission);
+      if (isFleetLaunched !== true) {
+        res.status(isFleetLaunched.status).json(isFleetLaunched.message);
+        return;
+      };
+
+      // Update the origin planet's resources
+      await mongodb
+        .getDb()
+        .db("empire-command")
+        .collection("planets")
+        .updateOne(
+          { _id: originPlanetId },
+          { $set: { resources: planet.resources } }
+        );
+      
       const result = await mongodb
         .getDb()
         .db("empire-command")
@@ -152,7 +178,54 @@ const createMission = async (req, res) => {
 };
 
 // Recall a mission by ID
-const recallMission = async (req, res) => {};
+const recallMission = async (req, res) => {
+  try {
+    const missionId = new ObjectId(req.params.mission_id);
+    const mission = await mongodb
+      .getDb()
+      .db("empire-command")
+      .collection("missions")
+      .findOne({ _id: missionId });
+
+    if (mission) {
+      if (mission.status === "en route") {
+        // Calculate new return time based on time since departure
+        const currentTime = new Date();
+        const timeElapsed = currentTime - mission.departureTime;
+        const newReturnTime = new Date(currentTime.getTime() + timeElapsed);
+
+        console.log(
+          "Recalling mission. New return time:",
+          newReturnTime.toLocaleString()
+        );
+
+        await mongodb
+          .getDb()
+          .db("empire-command")
+          .collection("missions")
+          .updateOne(
+            { _id: missionId },
+            {
+              $set: {
+                status: "returning(aborted)",
+                active: true,
+                returnTime: newReturnTime,
+              },
+            }
+          );
+
+        res.status(200).json("Mission recalled.");
+      } else {
+        res.status(400).json("Mission cannot be recalled.");
+      }
+    } else {
+      res.status(404).json("No mission found with this ID.");
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json("An error occurred.");
+  }
+};
 
 // Delete a mission by ID
 const deleteMission = async (req, res) => {

@@ -224,14 +224,55 @@ const joinGalaxy = async (req, res, next) => {
         return;
       }
 
-      // Check if the user is already in the galaxy
-      if (galaxy.users.includes(req.oidc.user.sub)) {
-        res.status(409).json({
-          message: "User is already in this galaxy.",
+      // Check if the user has a planet in the galaxy already
+      const user = await mongodb
+        .getDb()
+        .db("empire-command")
+        .collection("users")
+        .findOne({ _id: req.oidc.user.sub });
+      const planet = user.gameProfile.planetsOwned.find(
+        (planet) => toString(planet.galaxyId) === toString(req.body.galaxyId)
+      );
+      if (planet) {
+        res.status(412).json({
+          message: "Validation failed",
+          error: {
+            galaxyId: ["You already have a planet in this galaxy."],
+          },
         });
         return;
       }
 
+      next();
+    }
+  });
+};
+
+// Missions
+const createMission = async (req, res, next) => {
+  const rules = {
+    targetPlanet: "required|string",
+    missionType: "required|string|in:raid,transport,espionage,recycle",
+    "fleet.battleCruiser": "required|numeric",
+    "fleet.smallCargo": "required|numeric",
+    "fleet.largeCargo": "required|numeric",
+    "fleet.recycler": "required|numeric",
+    "fleet.espionageProbe": "required|numeric",
+    "cargo.metal": "required|numeric",
+    "cargo.crystal": "required|numeric",
+    "cargo.deuterium": "required|numeric",
+  };
+  const customMessages = {
+    required: "The :attribute field is required.",
+    in: "The :attribute field must be one of the following: raid, transport, espionage, recycle",
+  };
+  validator(req.body, rules, customMessages, (err, status) => {
+    if (!status) {
+      res.status(412).json({
+        message: "Validation failed",
+        error: err,
+      });
+    } else {
       next();
     }
   });
@@ -285,7 +326,7 @@ const requiresAdmin = async (req, res, next) => {
 };
 
 const requiresPlanetOwnership = async (req, res, next) => {
-  const planetId = new ObjectId(req.params.id);
+  const planetId = new ObjectId(req.params.planet_id);
   const planet = await mongodb
     .getDb()
     .db("empire-command")
@@ -296,6 +337,22 @@ const requiresPlanetOwnership = async (req, res, next) => {
   } else {
     res.status(403).json({
       message: "You do not own this planet.",
+    });
+  }
+};
+
+const requiresMissionOwnership = async (req, res, next) => {
+  const missionId = new ObjectId(req.params.mission_id);
+  const mission = await mongodb
+    .getDb()
+    .db("empire-command")
+    .collection("missions")
+    .findOne({ _id: missionId });
+  if (mission && mission.commandingUser === req.oidc.user.sub) {
+    next();
+  } else {
+    res.status(403).json({
+      message: "You do not own this mission.",
     });
   }
 };
@@ -311,8 +368,11 @@ module.exports = {
   // Users
   setNickname,
   joinGalaxy,
+  // Missions
+  createMission,
   // Misc
   verifyEmptyCoordinates,
   requiresAdmin,
   requiresPlanetOwnership,
+  requiresMissionOwnership,
 };
