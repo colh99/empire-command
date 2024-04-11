@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "swagger": "node ./swagger.js"
   },
   "keywords": [],
@@ -23,6 +23,7 @@
     "validatorjs": "^3.22.1"
   },
   "devDependencies": {
+    "jest": "^29.7.0",
     "nodemon": "^3.1.0"
   }
 }
