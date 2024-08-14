@@ -94,7 +94,7 @@ const setNickname = async (req, res) => {
 
 // Join a galaxy as the current logged in user
 const joinGalaxy = async (req, res) => {
-  const galaxyId = new ObjectId(req.body.galaxyId);
+  const galaxyId = ObjectId.createFromHexString(req.body.galaxyId);
   const coordinates = req.body.coordinates;
   // Find the current logged in user in the database
   let user = await mongodb

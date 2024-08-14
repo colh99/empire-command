@@ -5,7 +5,7 @@ const simulation = require("../game-utils/simulation");
 // Get a single planet's info by coordinates
 const getPlanetByCoordinates = async (req, res) => {
   try {
-    const galaxyId = new ObjectId(req.params.galaxyId);
+    const galaxyId = ObjectId.createFromHexString(req.params.galaxyId);
     const systemIndex = parseInt(req.params.systemIndex);
     const planetIndex = parseInt(req.params.planetIndex);
     const galaxy = await mongodb
@@ -45,7 +45,7 @@ const getPlanetByCoordinates = async (req, res) => {
 // Get a single planet's info by ID
 const getPlanetById = async (req, res) => {
   try {
-    const planetId = new ObjectId(req.params.planet_id);
+    const planetId = ObjectId.createFromHexString(req.params.planet_id);
     const planet = await mongodb
       .getDb()
       .db("empire-command")
@@ -77,7 +77,7 @@ const getPlanetById = async (req, res) => {
 
 // Create a new planet at the given coordinates
 const createPlanet = async (req, res) => {
-  const galaxyId = new ObjectId(req.params.galaxyId);
+  const galaxyId = ObjectId.createFromHexString(req.params.galaxyId);
   const givenSystemIndex = parseInt(req.params.systemIndex);
   const givenPlanetIndex = parseInt(req.params.planetIndex);
   // Construct the planet object
@@ -132,7 +132,7 @@ const createPlanet = async (req, res) => {
 
 // Rename a planet
 const renamePlanet = async (req, res) => {
-  const planetId = new ObjectId(req.params.planet_id);
+  const planetId = ObjectId.createFromHexString(req.params.planet_id);
   const newName = req.body.planetName;
   const result = await mongodb
     .getDb()
@@ -156,7 +156,7 @@ const renamePlanet = async (req, res) => {
 
 // Construct a building on a planet
 const constructBuilding = async (req, res) => {
-  const planetId = new ObjectId(req.params.planet_id);
+  const planetId = ObjectId.createFromHexString(req.params.planet_id);
   const building = req.body.building;
   const updateQuery = { $inc: {} };
 
@@ -208,7 +208,7 @@ const constructBuilding = async (req, res) => {
 
 // Construct ships of a given type on a planet
 const constructShip = async (req, res) => {
-  const planetId = new ObjectId(req.params.planet_id);
+  const planetId = ObjectId.createFromHexString(req.params.planet_id);
   const ship = req.body.ship;
   const updateQuery = { $inc: {} };
 
@@ -257,7 +257,7 @@ const constructShip = async (req, res) => {
 
 // Delete a planet. This means removing the planet reference from the galaxy according to the planet coordinates and deleting the planet object.
 const deletePlanet = async (req, res) => {
-  const planetId = new ObjectId(req.params.planet_id);
+  const planetId = ObjectId.createFromHexString(req.params.planet_id);
   const planet = await mongodb
     .getDb()
     .db("empire-command")
@@ -289,23 +289,26 @@ const deletePlanet = async (req, res) => {
         .db("empire-command")
         .collection("users")
         .findOne({ _id: planet.basicInfo.owner });
-
-      deleteUserPlanetRefResult = await mongodb
-        .getDb()
-        .db("empire-command")
-        .collection("users")
-        .updateOne(
-          { _id: user._id },
-          {
-            $pull: {
-              "gameProfile.planetsOwned": planetId,
-            },
-          }
-        );
+      if (user !== null) { // If the planet does not have an owner, skip this step
+        deleteUserPlanetRefResult = await mongodb
+          .getDb()
+          .db("empire-command")
+          .collection("users")
+          .updateOne(
+            { _id: user._id },
+            {
+              $pull: {
+                "gameProfile.planetsOwned": planetId,
+              },
+            }
+          );
+      } else {
+        deleteUserPlanetRefResult = false; // did not remove planet reference from user profile because planet had no owner
+      }
     } else {
       res.status(500).json("Failed to remove planet reference from galaxy.");
     }
-    if (deleteUserPlanetRefResult.acknowledged) {
+    if (deleteUserPlanetRefResult.acknowledged || deleteUserPlanetRefResult == false) {
       // Delete the planet object
       const deletePlanetResult = await mongodb
         .getDb()

@@ -6,7 +6,7 @@ const simulation = require("../game-utils/simulation");
 const getMissionById = async (req, res) => {
   console.log("Getting single mission by ID:");
   try {
-    const missionId = new ObjectId(req.params.id);
+    const missionId = ObjectId.createFromHexString(req.params.id);
     const mission = await mongodb
       .getDb()
       .db("empire-command")
@@ -91,14 +91,14 @@ const getActiveMissionsByCurrentUser = async (req, res) => {
 // Create a new mission
 const createMission = async (req, res) => {
   try {
-    const originPlanetId = new ObjectId(req.params.planet_id);
+    const originPlanetId = ObjectId.createFromHexString(req.params.planet_id);
     const originPlanet = await mongodb
       .getDb()
       .db("empire-command")
       .collection("planets")
       .findOne({ _id: originPlanetId });
 
-    const targetPlanetId = new ObjectId(req.body.targetPlanet);
+    const targetPlanetId = ObjectId.createFromHexString(req.body.targetPlanet);
     const targetPlanet = await mongodb
       .getDb()
       .db("empire-command")
@@ -180,7 +180,7 @@ const createMission = async (req, res) => {
 // Recall a mission by ID
 const recallMission = async (req, res) => {
   try {
-    const missionId = new ObjectId(req.params.mission_id);
+    const missionId = ObjectId.createFromHexString(req.params.mission_id);
     const mission = await mongodb
       .getDb()
       .db("empire-command")
@@ -230,7 +230,7 @@ const recallMission = async (req, res) => {
 // Delete a mission by ID
 const deleteMission = async (req, res) => {
   try {
-    const missionId = new ObjectId(req.params.id);
+    const missionId = ObjectId.createFromHexString(req.params.id);
     const mission = await mongodb
       .getDb()
       .db("empire-command")

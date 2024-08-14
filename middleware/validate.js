@@ -94,7 +94,7 @@ const createPlanet = async (req, res, next) => {
         error: err,
       });
     } else {
-      const galaxyId = new ObjectId(req.params.galaxyId);
+      const galaxyId = ObjectId.createFromHexString(req.params.galaxyId);
       const coordinates = {
         systemIndex: req.params.systemIndex,
         planetIndex: req.params.planetIndex,
@@ -253,7 +253,7 @@ const joinGalaxy = async (req, res, next) => {
       });
     } else {
       // Get the galaxy by ID
-      const galaxyId = new ObjectId(req.body.galaxyId);
+      const galaxyId = ObjectId.createFromHexString(req.body.galaxyId);
       const galaxy = await mongodb
         .getDb()
         .db("empire-command")
@@ -379,14 +379,14 @@ const requiresUserExists = async (req, res, next) => {
   if (user) {
     next();
   } else {
-    res.status(404).json({
+    res.status(403).json({
       message: "You are logged in, but have not created a profile.",
     });
   }
 };
 
 const requiresPlanetOwnership = async (req, res, next) => {
-  const planetId = new ObjectId(req.params.planet_id);
+  const planetId = ObjectId.createFromHexString(req.params.planet_id);
   const planet = await mongodb
     .getDb()
     .db("empire-command")
@@ -402,7 +402,7 @@ const requiresPlanetOwnership = async (req, res, next) => {
 };
 
 const requiresMissionOwnership = async (req, res, next) => {
-  const missionId = new ObjectId(req.params.mission_id);
+  const missionId = ObjectId.createFromHexString(req.params.mission_id);
   const mission = await mongodb
     .getDb()
     .db("empire-command")

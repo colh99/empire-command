@@ -3,7 +3,7 @@ const ObjectId = require("mongodb").ObjectId;
 
 // Get a single galaxy's rules by ID
 const getGalaxyRulesById = async (req, res) => {
-  const galaxyId = new ObjectId(req.params.id);
+  const galaxyId = ObjectId.createFromHexString(req.params.id);
   const galaxy = await mongodb
     .getDb()
     .db("empire-command")
@@ -18,7 +18,7 @@ const getGalaxyRulesById = async (req, res) => {
 
 // Get a single galaxy's users by ID
 const getGalaxyUsersById = async (req, res) => {
-  const galaxyId = new ObjectId(req.params.id);
+  const galaxyId = ObjectId.createFromHexString(req.params.id);
   const galaxy = await mongodb
     .getDb()
     .db("empire-command")
@@ -33,7 +33,7 @@ const getGalaxyUsersById = async (req, res) => {
 
 // Get a single galaxy's systems by ID
 const getGalaxySystemsById = async (req, res) => {
-  const galaxyId = new ObjectId(req.params.id);
+  const galaxyId = ObjectId.createFromHexString(req.params.id);
   const galaxy = await mongodb
     .getDb()
     .db("empire-command")
@@ -48,7 +48,7 @@ const getGalaxySystemsById = async (req, res) => {
 
 // Get a single system in the galaxy by system index
 const getGalaxySystemByNumber = async (req, res) => {
-  const galaxyId = new ObjectId(req.params.id);
+  const galaxyId = ObjectId.createFromHexString(req.params.id);
   const systemIndex = parseInt(req.params.systemIndex);
   const galaxy = await mongodb
     .getDb()
@@ -94,7 +94,7 @@ const createGalaxy = async (req, res) => {
 
 // Update a galaxy's rules by ID
 const updateGalaxyRulesById = async (req, res) => {
-  const galaxyId = new ObjectId(req.params.id);
+  const galaxyId = ObjectId.createFromHexString(req.params.id);
   const updatedRules = req.body;
   const result = await mongodb
     .getDb()
@@ -110,7 +110,7 @@ const updateGalaxyRulesById = async (req, res) => {
 
 // Delete a galaxy
 const deleteGalaxy = async (req, res) => {
-  const galaxyId = new ObjectId(req.params.id);
+  const galaxyId = ObjectId.createFromHexString(req.params.id);
   const result = await mongodb
     .getDb()
     .db("empire-command")

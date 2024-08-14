@@ -11,8 +11,8 @@ const config = {
   authRequired: false,
   auth0Logout: true,
   secret: process.env.AUTH_SECRET,
-  baseURL: 'https://empire-command-api.onrender.com',
-  //baseURL: "http://localhost:3000",
+  //baseURL: 'https://empire-command-api.onrender.com',
+  baseURL: "http://localhost:3000",
   clientID: "qdQwjXUiTSsy0dsrJgr4FQHnTC0NzYTr",
   issuerBaseURL: "https://dev-wd8d1nsmhc0xwqfo.us.auth0.com",
 };
