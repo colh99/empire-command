@@ -143,23 +143,13 @@ const createMission = async (req, res) => {
         .findOne({ _id: originPlanet.galaxyId });
 
       // Update the origin planet's resources
-      planet = simulation.updatePlanetResources(originPlanet, galaxy);
+      simulation.updatePlanetResources(originPlanet, galaxy);
       // Check if the mission parameters are valid
       const isFleetLaunched = await simulation.launchFleet(originPlanet, mission);
       if (isFleetLaunched !== true) {
-        res.status(isFleetLaunched.status).json(isFleetLaunched.message);
+        res.status(400).json(isFleetLaunched);
         return;
       };
-
-      // Update the origin planet's resources
-      await mongodb
-        .getDb()
-        .db("empire-command")
-        .collection("planets")
-        .updateOne(
-          { _id: originPlanetId },
-          { $set: { resources: planet.resources } }
-        );
       
       const result = await mongodb
         .getDb()
