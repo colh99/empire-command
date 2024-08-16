@@ -1,6 +1,7 @@
 const mongodb = require("../db/connect");
 const ObjectId = require("mongodb").ObjectId;
 const simulation = require("../game-utils/simulation");
+const { syncPlanetResources } = require("./planets");
 
 // Get a single mission's info by ID
 const getMissionById = async (req, res) => {
@@ -91,6 +92,17 @@ const getActiveMissionsByCurrentUser = async (req, res) => {
 // Create a new mission
 const createMission = async (req, res) => {
   try {
+    // Get the number of ships in the fleet
+    let numShips = 0;
+    for (const ship in req.body.fleet) {
+      numShips += req.body.fleet[ship];
+    }
+    if (numShips === 0) {
+      res.status(400).json("You must send at least one ship.");
+      return;
+    }
+
+    // Get the origin planet
     const originPlanetId = ObjectId.createFromHexString(req.params.planet_id);
     const originPlanet = await mongodb
       .getDb()
@@ -105,62 +117,94 @@ const createMission = async (req, res) => {
       .collection("planets")
       .findOne({ _id: targetPlanetId });
 
+    if (!targetPlanet) {
+      res.status(404).json("No target planet found with this ID.");
+      return;
+    }
+
+    // Get the galaxy the origin planet is in
+    const galaxy = await mongodb
+      .getDb()
+      .db("empire-command")
+      .collection("galaxies")
+      .findOne({ _id: originPlanet.galaxyId });
+
+    const travelSpeedModifer =
+      galaxy.rulesConfig.GAME_OVERALL_SPEED * galaxy.rulesConfig.TRAVEL_SPEED;
+
     // Determine travel times
     const hoursTravelTime = await simulation.determineTravelTime(
       originPlanet,
       targetPlanet,
-      req.body.fleet
+      req.body.fleet,
+      travelSpeedModifer
     );
 
-    if (targetPlanet) {
-      const mission = {
-        commandingUser: req.oidc.user.sub,
-        originPlanet: originPlanetId,
-        targetPlanet: targetPlanetId,
-        departureTime: new Date(),
-        arrivalTime: new Date(
-          new Date().getTime() + hoursTravelTime * 60 * 60 * 1000
-        ),
-        returnTime: new Date(
-          new Date().getTime() + hoursTravelTime * 2 * 60 * 60 * 1000
-        ),
-        active: true,
-        status: "en route",
-        missionType: req.body.missionType,
-        fleet: req.body.fleet,
-        cargo: req.body.cargo,
-      };
+    const mission = {
+      commandingUser: req.oidc.user.sub,
+      originPlanet: originPlanetId,
+      targetPlanet: targetPlanetId,
+      departureTime: new Date(),
+      arrivalTime: new Date(
+        new Date().getTime() + hoursTravelTime * 60 * 60 * 1000
+      ),
+      returnTime: new Date(
+        new Date().getTime() + hoursTravelTime * 2 * 60 * 60 * 1000
+      ),
+      active: true,
+      status: "en route",
+      missionType: req.body.missionType,
+      fleet: req.body.fleet,
+      cargo: req.body.cargo,
+    };
 
-      console.log("Departure time:", mission.departureTime.toLocaleString());
-      console.log("Arrival time:", mission.arrivalTime.toLocaleString());
-      console.log("Return time:", mission.returnTime.toLocaleString());
+    console.log("Departure time:", mission.departureTime.toLocaleString());
+    console.log("Arrival time:", mission.arrivalTime.toLocaleString());
+    console.log("Return time:", mission.returnTime.toLocaleString());
 
-      // Get the galaxy for the origin planet
-      const galaxy = await mongodb
-        .getDb()
-        .db("empire-command")
-        .collection("galaxies")
-        .findOne({ _id: originPlanet.galaxyId });
+    // Update the origin planet's resources
+    let updatedOriginPlanet = await simulation.calculateResourceProduction(originPlanet, galaxy);
 
-      // Update the origin planet's resources
-      simulation.updatePlanetResources(originPlanet, galaxy);
-      // Check if the mission parameters are valid
-      const isFleetLaunched = await simulation.launchFleet(originPlanet, mission);
-      if (isFleetLaunched !== true) {
-        res.status(400).json(isFleetLaunched);
-        return;
-      };
-      
-      const result = await mongodb
-        .getDb()
-        .db("empire-command")
-        .collection("missions")
-        .insertOne(mission);
+    // Check if the mission parameters are valid
+    const canFleetLaunch = await simulation.checkMissionParameters(updatedOriginPlanet, mission);
+    if (canFleetLaunch !== true) {
+      syncPlanetResources(updatedOriginPlanet); // update resources in database, even without launch
+      res.status(400).json(canFleetLaunch);
+      return;
+    };
 
-      res.status(201).json(result);
-    } else {
-      res.status(404).json("No target planet found with this ID.");
+    // Adjust the fleet of the origin planet
+    const updatedFleet = {};
+    for (const ship in mission.fleet) {
+      updatedFleet[ship] = originPlanet.fleet[ship] - mission.fleet[ship];
     }
+
+    // Deduct resources from origin planet
+    updatedOriginPlanet.resources.metal -= mission.cargo.metal;
+    updatedOriginPlanet.resources.crystal -= mission.cargo.crystal;
+    updatedOriginPlanet.resources.deuterium -= mission.cargo.deuterium;
+
+    // Insert the mission into the database
+    const result = await mongodb
+      .getDb()
+      .db("empire-command")
+      .collection("missions")
+      .insertOne(mission);
+    res.status(201).json(result);
+
+    // Add the mission id to the origin planet's outboundMissions, and update the planet in the database in one go
+    await mongodb
+      .getDb()
+      .db("empire-command")
+      .collection("planets")
+      .updateOne(
+        { _id: originPlanetId },
+        {
+          $push: { outboundMissions: result.insertedId },
+          $set: { fleet: updatedFleet, resources: updatedOriginPlanet.resources },
+        }
+      );
+    
   } catch (err) {
     console.error(err);
     res.status(500).json("An error occurred.");

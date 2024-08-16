@@ -1,5 +1,3 @@
-const mongodb = require("../db/connect");
-const ObjectId = require("mongodb").ObjectId;
 const buildingData = require("../game-utils/game-rules/buildings");
 const shipData = require("../game-utils/game-rules/ships");
 
@@ -10,14 +8,16 @@ const shipData = require("../game-utils/game-rules/ships");
  * @return {[object]}       Returns the updated planet object
  * @async
  */
-const updatePlanetResources = async (planet, galaxy) => {
+const calculateResourceProduction = async (planet, galaxy) => {
   if (planet && galaxy) {
     // Calculate the time difference
     const currentTime = new Date();
     const timeDifference = (currentTime - planet.lastUpdated) / 1000;
     const timeDifferenceInHours = timeDifference / 3600;
 
-    // Calculate the new resources based on the time difference. Use the buildingData object to get the resource production rates, multiplied by the number of buildings of that type on the planet.
+    // Calculate the new resources based on the time difference. 
+    // Use the buildingData object to get the resource production rates, 
+    // multiplied by the number of buildings of that type on the planet.
     const galaxyMiningSpeedModifier =
       galaxy.rulesConfig.MINING_SPEED * galaxy.rulesConfig.GAME_OVERALL_SPEED;
 
@@ -56,21 +56,10 @@ const updatePlanetResources = async (planet, galaxy) => {
     );
     console.log("Updated resources: ", updatedResources);
 
-    // Update the planet
-    await mongodb
-      .getDb()
-      .db("empire-command")
-      .collection("planets")
-      .updateOne(
-        { _id: planet._id },
-        { $set: { resources: updatedResources, lastUpdated: currentTime } }
-      );
-
     // Return the updated planet
     return {
       ...planet,
-      resources: updatedResources,
-      lastUpdated: currentTime,
+      resources: updatedResources
     };
   }
 };
@@ -107,6 +96,7 @@ const checkBuildingResourceCost = async (planet, building) => {
     ) {
       return totalCost;
     } else {
+      console.log("Not enough resources to build.");
       return false;
     }
   }
@@ -144,6 +134,7 @@ const checkShipResourceCost = async (planet, ship) => {
     ) {
       return totalCost;
     } else {
+      console.log("Not enough resources to build.");
       return false;
     }
   }
@@ -157,7 +148,7 @@ const checkShipResourceCost = async (planet, ship) => {
  * @return {[object]} Returns the new planet object
  * @async
  */
-const colonizePlanet = async (user, galaxy, coordinates) => {
+const createColonyPlanet = async (user, galaxy, coordinates) => {
   if (user && galaxy && coordinates) {
     console.log("--COLONIZE PLANET");
     // Give the user a planet in the galaxy
@@ -213,7 +204,7 @@ const colonizePlanet = async (user, galaxy, coordinates) => {
  * @return {[object]} Returns the time in hours it will take for the fleet to reach its target
  * @async
  */
-const determineTravelTime = async (origin, target, fleet) => {
+const determineTravelTime = async (origin, target, fleet, speedModifer) => {
   if (origin && target && fleet) {
     console.log("--DETERMINE TRAVEL TIME");
     console.log("Origin:", origin.basicInfo);
@@ -248,16 +239,6 @@ const determineTravelTime = async (origin, target, fleet) => {
       }
     }
 
-    // Get speed modifier from galaxy rules
-    const galaxy = await mongodb
-      .getDb()
-      .db("empire-command")
-      .collection("galaxies")
-      .findOne({ _id: origin.galaxyId });
-
-    const speedModifer =
-      galaxy.rulesConfig.GAME_OVERALL_SPEED * galaxy.rulesConfig.TRAVEL_SPEED;
-
     console.log("Speed:", speed);
     // Determine the time it will take for the fleet to reach its target
     const hoursTravelTime = distance / (speed * speedModifer);
@@ -273,7 +254,7 @@ const determineTravelTime = async (origin, target, fleet) => {
  * @return {[object]} Returns true if the mission parameters are valid, otherwise returns an error message
  * @async
  */
-const launchFleet = async (origin, mission) => {
+const checkMissionParameters = async (origin, mission) => {
   if (origin && mission) {
     console.log("--LAUNCH FLEET");
     // Make sure the planet has enough of each ship to send on the mission
@@ -316,7 +297,7 @@ const launchFleet = async (origin, mission) => {
       mission.cargo.metal + mission.cargo.crystal + mission.cargo.deuterium;
 
     console.log("Total cargo capacity:", totalCargoCapacity);
-    console.log("Total resources:", totalResources);
+    console.log("Cargo sent:", totalResources, " (Metal:", mission.cargo.metal, "Crystal:", mission.cargo.crystal, "Deuterium:", mission.cargo.deuterium, ")");
     if (totalCargoCapacity < totalResources) {
       return {
         status: 400,
@@ -328,39 +309,16 @@ const launchFleet = async (origin, mission) => {
         },
       };
     }
-    // Adjust the resources of the origin planet
-    const updatedResources = {
-      metal: origin.resources.metal - mission.cargo.metal,
-      crystal: origin.resources.crystal - mission.cargo.crystal,
-      deuterium: origin.resources.deuterium - mission.cargo.deuterium,
-    };
-    // Adjust the fleet of the origin planet
-    const updatedFleet = {};
-    for (const ship in mission.fleet) {
-      updatedFleet[ship] = origin.fleet[ship] - mission.fleet[ship];
-    }
-
-    // Update the origin planet
-    await mongodb
-      .getDb()
-      .db("empire-command")
-      .collection("planets")
-      .updateOne(
-        { _id: origin._id },
-        {
-          $set: { resources: updatedResources, fleet: updatedFleet },
-        }
-      );
-    console.log("Succesfully Launched. Planet updated.");
+    console.log("Mission parameters are valid.");
     return true;
   }
 };
 
 module.exports = {
-  updatePlanetResources,
+  calculateResourceProduction,
   checkBuildingResourceCost,
   checkShipResourceCost,
-  colonizePlanet,
+  createColonyPlanet,
   determineTravelTime,
-  launchFleet,
+  checkMissionParameters,
 };

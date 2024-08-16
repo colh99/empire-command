@@ -22,13 +22,14 @@ const getPlanetByCoordinates = async (req, res) => {
         .collection("planets")
         .findOne({ _id: planetId });
 
-      // Update the planet's resources before returning it
-      const updatedPlanet = await simulation.updatePlanetResources(
+      // Determine the change in resource production since the last update
+      const updatedPlanet = await simulation.calculateResourceProduction(
         planet,
         galaxy
       );
 
       if (updatedPlanet) {
+        syncPlanetResources(updatedPlanet); // Update resources in the database
         res.status(200).json(updatedPlanet);
       } else {
         res.status(404).json("No planet found at these coordinates.");
@@ -58,13 +59,14 @@ const getPlanetById = async (req, res) => {
       .collection("galaxies")
       .findOne({ _id: planet.galaxyId });
 
-    // Update the planet's resources before returning it
-    const updatedPlanet = await simulation.updatePlanetResources(
+    // Determine the change in resource production since the last update
+    const updatedPlanet = await simulation.calculateResourceProduction(
       planet,
       galaxy
     );
 
     if (updatedPlanet) {
+      syncPlanetResources(updatedPlanet); // Update resources in the database
       res.status(200).json(updatedPlanet);
     } else {
       res.status(404).json("Planet not found.");
@@ -174,7 +176,7 @@ const constructBuilding = async (req, res) => {
     .findOne({ _id: planet.galaxyId });
 
   // Update the planet's resources
-  planet = await simulation.updatePlanetResources(planet, galaxy);
+  planet = await simulation.calculateResourceProduction(planet, galaxy);
 
   // Check if the planet has enough resources to construct the building
   const totalCost = await simulation.checkBuildingResourceCost(
@@ -182,10 +184,6 @@ const constructBuilding = async (req, res) => {
     building
   );
   if (totalCost) {
-    // Update the planet's resources
-    updateQuery.$inc["resources.metal"] = -totalCost.metal;
-    updateQuery.$inc["resources.crystal"] = -totalCost.crystal;
-    updateQuery.$inc["resources.deuterium"] = -totalCost.deuterium;
     // Construct the building
     updateQuery.$inc[`buildings.${building}`] = 1;
   } else {
@@ -200,8 +198,14 @@ const constructBuilding = async (req, res) => {
     .updateOne({ _id: planetId }, updateQuery);
 
   if (result.acknowledged) {
-    res.status(200).json("Building constructed.");
+    // Update the planet's resources
+    planet.resources.metal -= totalCost.metal;
+    planet.resources.crystal -= totalCost.crystal;
+    planet.resources.deuterium -= totalCost.deuterium;
+    res.status(200).json("Building constructed: " + "Level " + (planet.buildings[building] + 1) + " " + building + ".");
+    syncPlanetResources(planet); // Update resources in the database
   } else {
+    syncPlanetResources(planet); // Update resources in the database, without the building cost
     res.status(500).json("Failed to construct buildings.");
   }
 };
@@ -226,15 +230,11 @@ const constructShip = async (req, res) => {
     .findOne({ _id: planet.galaxyId });
 
   // Update the planet's resources
-  planet = await simulation.updatePlanetResources(planet, galaxy);
+  planet = await simulation.calculateResourceProduction(planet, galaxy);
 
   // Check if the planet has enough resources to construct the ships
   const totalCost = await simulation.checkShipResourceCost(planet, ship);
   if (totalCost) {
-    // Update the planet's resources
-    updateQuery.$inc["resources.metal"] = -totalCost.metal;
-    updateQuery.$inc["resources.crystal"] = -totalCost.crystal;
-    updateQuery.$inc["resources.deuterium"] = -totalCost.deuterium;
     // Construct the ships
     updateQuery.$inc[`fleet.${ship.type}`] = ship.quantity;
   } else {
@@ -249,8 +249,14 @@ const constructShip = async (req, res) => {
     .updateOne({ _id: planetId }, updateQuery);
 
   if (result.acknowledged) {
-    res.status(200).json("Ships constructed.");
+    // Update the planet's resources
+    planet.resources.metal -= totalCost.metal;
+    planet.resources.crystal -= totalCost.crystal;
+    planet.resources.deuterium -= totalCost.deuterium;
+    res.status(200).json("Ships constructed: " + ship.quantity + " " + ship.type + ".");
+    syncPlanetResources(planet); // Update resources in the database
   } else {
+    syncPlanetResources(planet); // Update resources in the database, without the ship cost
     res.status(500).json("Failed to construct ships.");
   }
 };
@@ -331,6 +337,25 @@ const deletePlanet = async (req, res) => {
   }
 };
 
+// Upload planet's current values to the database
+const syncPlanetResources = async (planet) => {
+  const result = await mongodb
+    .getDb()
+    .db("empire-command")
+    .collection("planets")
+    .updateOne(
+      { _id: planet._id },
+      {
+        $set: {
+          lastUpdated: new Date(),
+          resources: planet.resources
+        },
+      }
+    );
+
+  return result.acknowledged;
+};
+
 module.exports = {
   getPlanetByCoordinates,
   getPlanetById,
@@ -339,4 +364,5 @@ module.exports = {
   constructBuilding,
   constructShip,
   deletePlanet,
+  syncPlanetResources,
 };

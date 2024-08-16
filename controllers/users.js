@@ -111,7 +111,7 @@ const joinGalaxy = async (req, res) => {
     .findOne({ _id: galaxyId });
 
   // Give the player a planet in the galaxy
-  const planet = await simulation.colonizePlanet(user, galaxy, coordinates);
+  const planet = await simulation.createColonyPlanet(user, galaxy, coordinates);
 
   // Add the planet to the database and store the new planet ID
   const planetId = await mongodb
