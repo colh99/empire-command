@@ -297,7 +297,7 @@ const joinGalaxy = async (req, res, next) => {
 const createMission = async (req, res, next) => {
   const rules = {
     targetPlanet: "required|string",
-    missionType: "required|string|in:raid,transport,espionage,recycle",
+    missionType: "required|string|in:raid,cargo,transport,espionage,recycle",
     "fleet.battleCruiser": "required|numeric",
     "fleet.smallCargo": "required|numeric",
     "fleet.largeCargo": "required|numeric",
@@ -309,7 +309,7 @@ const createMission = async (req, res, next) => {
   };
   const customMessages = {
     required: "The :attribute field is required.",
-    in: "The :attribute field must be one of the following: raid, transport, espionage, recycle",
+    in: "The :attribute field must be one of the following: raid, cargo, transport, espionage, recycle",
   };
   validator(req.body, rules, customMessages, (err, status) => {
     if (!status) {

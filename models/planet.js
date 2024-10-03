@@ -19,12 +19,12 @@ const planetSchema = new Schema({
         }],
     }],
 
-    inboundMissions: [{
+    missionsToPlanet: [{
         type: ObjectId,
         ref: 'Mission'
     }],
 
-    outboundMissions: [{
+    missionsFromPlanet: [{
         type: ObjectId,
         ref: 'Mission'
     }],

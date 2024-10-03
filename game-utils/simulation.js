@@ -1,5 +1,6 @@
 const buildingData = require("../game-utils/game-rules/buildings");
 const shipData = require("../game-utils/game-rules/ships");
+const missionsService = require("../services/missionsService");
 
 /**
  * Updates the resources of a planet based on the time difference since the last update.
@@ -163,8 +164,8 @@ const createColonyPlanet = async (user, galaxy, coordinates) => {
           planetIndex: coordinates.planetIndex,
         },
       },
-      inboundMissions: [],
-      outboundMissions: [],
+      missionsToPlanet: [],
+      missionsFromPlanet: [],
       resources: {
         metal: 1000,
         crystal: 1000,

@@ -41,13 +41,13 @@ const missionSchema = new Schema({
     
     status: {
         type: String,
-        enum: ["en route", "returning", "returning(aborted)", "aborted", "completed", "destroyed"],
+        enum: ["en route", "returning", "returning(aborted)", "completed", "destroyed"],
         required: true
     },
 
     missionType: {
         type: String, 
-        enum: ["raid", "transport", "espionage", "recycle"],
+        enum: ["raid", "cargo", "transport", "espionage", "recycle"],
         required: true
     },
 

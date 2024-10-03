@@ -949,23 +949,6 @@
         }
       }
     },
-    "Resources": {
-      "type": "object",
-      "properties": {
-        "metal": {
-          "type": "number",
-          "example": 1000
-        },
-        "crystal": {
-          "type": "number",
-          "example": 1000
-        },
-        "deuterium": {
-          "type": "number",
-          "example": 1000
-        }
-      }
-    },
     "Fleet": {
       "type": "object",
       "properties": {
@@ -1035,6 +1018,10 @@
     "Planet": {
       "type": "object",
       "properties": {
+        "lastUpdated": {
+          "type": "string",
+          "example": "DateTime"
+        },
         "basicInfo": {
           "type": "object",
           "properties": {
@@ -1048,8 +1035,40 @@
             }
           }
         },
+        "missionsToPlanet": {
+          "type": "array",
+          "example": [
+            "ObjectId"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "missionsFromPlanet": {
+          "type": "array",
+          "example": [
+            "ObjectId"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
         "resources": {
-          "$ref": "#/definitions/Resources"
+          "type": "object",
+          "properties": {
+            "metal": {
+              "type": "number",
+              "example": 1000
+            },
+            "crystal": {
+              "type": "number",
+              "example": 1000
+            },
+            "deuterium": {
+              "type": "number",
+              "example": 1000
+            }
+          }
         },
         "fleet": {
           "$ref": "#/definitions/Fleet"
@@ -1062,40 +1081,57 @@
     "Mission": {
       "type": "object",
       "properties": {
+        "commandingUser": {
+          "type": "string",
+          "example": "ObjectId"
+        },
+        "originPlanet": {
+          "type": "string",
+          "example": "ObjectId"
+        },
         "targetPlanet": {
           "type": "string",
           "example": "ObjectId"
         },
+        "departureTime": {
+          "type": "string",
+          "example": "DateTime"
+        },
+        "arrivalTime": {
+          "type": "string",
+          "example": "DateTime"
+        },
+        "returnTime": {
+          "type": "string",
+          "example": "DateTime"
+        },
+        "active": {
+          "type": "boolean",
+          "example": true
+        },
         "missionType": {
           "type": "string",
-          "example": "raid"
+          "example": "cargo"
         },
         "fleet": {
           "$ref": "#/definitions/Fleet"
         },
         "cargo": {
-          "$ref": "#/definitions/Resources"
-        }
-      }
-    },
-    "Rules": {
-      "type": "object",
-      "properties": {
-        "GAME_OVERALL_SPEED": {
-          "type": "number",
-          "example": 1
-        },
-        "TRAVEL_SPEED": {
-          "type": "number",
-          "example": 1
-        },
-        "MINING_SPEED": {
-          "type": "number",
-          "example": 1
-        },
-        "BUILDING_SPEED": {
-          "type": "number",
-          "example": 1
+          "type": "object",
+          "properties": {
+            "metal": {
+              "type": "number",
+              "example": 1000
+            },
+            "crystal": {
+              "type": "number",
+              "example": 1000
+            },
+            "deuterium": {
+              "type": "number",
+              "example": 1000
+            }
+          }
         }
       }
     },
@@ -1107,11 +1143,60 @@
           "example": "Unnamed Galaxy"
         },
         "rulesConfig": {
-          "$ref": "#/definitions/Rules"
+          "type": "object",
+          "properties": {
+            "GAME_OVERALL_SPEED": {
+              "type": "number",
+              "example": 1
+            },
+            "TRAVEL_SPEED": {
+              "type": "number",
+              "example": 1
+            },
+            "MINING_SPEED": {
+              "type": "number",
+              "example": 1
+            },
+            "BUILDING_SPEED": {
+              "type": "number",
+              "example": 1
+            }
+          }
         },
-        "numSystems": {
-          "type": "number",
-          "example": 10
+        "systems": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "example": [
+              "ObjectId",
+              null,
+              null,
+              "ObjectId",
+              null,
+              null,
+              null,
+              null,
+              null,
+              "ObjectId",
+              null,
+              null,
+              null,
+              null,
+              "ObjectId"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "users": {
+          "type": "array",
+          "example": [
+            "ObjectId"
+          ],
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
@@ -1121,6 +1206,19 @@
         "username": {
           "type": "string",
           "example": "User123"
+        },
+        "email": {
+          "type": "string",
+          "example": "email"
+        },
+        "galaxiesJoined": {
+          "type": "array",
+          "example": [
+            "ObjectId"
+          ],
+          "items": {
+            "type": "string"
+          }
         },
         "ownedPlanets": {
           "type": "array",

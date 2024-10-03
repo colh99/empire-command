@@ -8,7 +8,7 @@ const app = express();
 const { auth, requiresAuth } = require("express-openid-connect");
 
 const config = {
-  authRequired: false,
+  authRequired: true,
   auth0Logout: true,
   secret: process.env.AUTH_SECRET,
   baseURL: 'https://empire-command-api.onrender.com',

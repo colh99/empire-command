@@ -2,6 +2,7 @@ const mongodb = require("../db/connect");
 const ObjectId = require("mongodb").ObjectId;
 const simulation = require("../game-utils/simulation");
 const { syncPlanetResources } = require("./planets");
+const missionsService = require("../services/missionsService");
 
 // Get a single mission's info by ID
 const getMissionById = async (req, res) => {
@@ -36,6 +37,8 @@ const getActiveMissions = async (req, res) => {
       .toArray();
 
     if (missions) {
+      // Run all mission events
+      missionsService.runAllMissionEvents();
       res.status(200).json(missions);
     } else {
       res.status(404).json("No active missions found.");
@@ -192,7 +195,7 @@ const createMission = async (req, res) => {
       .insertOne(mission);
     res.status(201).json(result);
 
-    // Add the mission id to the origin planet's outboundMissions, and update the planet in the database in one go
+    // Add the mission id to the origin planet's missionsFromPlanet, and update the planet in the database in one go
     await mongodb
       .getDb()
       .db("empire-command")
@@ -200,7 +203,7 @@ const createMission = async (req, res) => {
       .updateOne(
         { _id: originPlanetId },
         {
-          $push: { outboundMissions: result.insertedId },
+          $push: { missionsFromPlanet: result.insertedId },
           $set: { fleet: updatedFleet, resources: updatedOriginPlanet.resources },
         }
       );
