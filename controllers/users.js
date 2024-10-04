@@ -168,7 +168,8 @@ const joinGalaxy = async (req, res) => {
     res.status(500).json({ message: "Failed to update user." });
     return;
   } else {
-    res.status(200).json({ message: "Successfully joined galaxy." });
+    // Send a success message and show the user's new planet id
+    res.status(200).json({ message: "Successfully joined galaxy.", "planetId": planetId });
   }
 };
 

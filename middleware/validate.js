@@ -275,14 +275,13 @@ const joinGalaxy = async (req, res, next) => {
         .db("empire-command")
         .collection("users")
         .findOne({ _id: req.oidc.user.sub });
-      const planet = user.gameProfile.planetsOwned.find(
-        (planet) => toString(planet.galaxyId) === toString(req.body.galaxyId)
-      );
-      if (planet) {
+
+      // Make sure the user doesn't have the galaxy id in their joined galaxies
+      if (user.gameProfile.galaxiesJoined.includes(req.body.galaxyId)) {
         res.status(412).json({
           message: "Validation failed",
           error: {
-            galaxyId: ["You already have a planet in this galaxy."],
+            galaxyId: ["You already joined this galaxy."],
           },
         });
         return;
