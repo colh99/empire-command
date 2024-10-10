@@ -5,9 +5,10 @@ Empire Command is a space strategy war game played in real time, inspired primar
 The game centers around resource accumulation and time-based fleet tactics. Each player is given an initial **planet** on which they can construct **buildings** or **fleets**. **Buildings** produce additional **resources** or serve other purposes, while **fleets** can be used on **missions**.
 
 ## Components
-- **Back-end Server**: Express.js on Node.js, deployed via Render.com
+- **Back-End Server**: Express.js on Node.js, deployed via Render.com
 - **Database**: MongoDB
 - **User Authentication**: OAuth via Auth0 (Google login)
+- **Unit Testing**: Limited unit tests are implemented with Jest, more to be added
 
 ## Endpoint Documentation
 You can visit https://empire-command-api.onrender.com/api-docs/ to see the documentation for each endpoint. Note that it may take 30-60 seconds for the server to spin up. 
@@ -117,6 +118,7 @@ Mission parameters are valid.
 
 ## Future Work
 - Improve integration of resource production updates and mission updates to ensure accuracy.
+- Increase test coverage
 - Some buildings produce energy (Solar Plant, Fusion Reactor). Resource production buildings consume energy. If there is an energy deficit, resource production is reduced.
 - Buildings and fleets should take time to build, and be added to seperate build queues.
 - Planets are limited by resource storage capacities, which can be increased by upgrading storage buildings (Metal Storage, Crystal Storage, Deuterium Tank).
@@ -125,5 +127,5 @@ Mission parameters are valid.
 - More mission types: raid (attack another planet and steal resources), transport (send a fleet to another planet), espionage (send an espionage probe to GET intel on another player's planet), recycle (harvest resources from a planet's atmosphere).
 - Battle simulation: when a raid mission arrives, a battle should be simulated. This compares the mission fleet and the target planet fleet, and determines how many of each to destroy. If the attacker is determined to be victorious, the attacker fleet will steal resources and return.
 - Ships destroyed in battle leave a debris field at a planet, which can be recovered by anyone with the recycle mission and recycler ship.
-- Player inbox: Various actions should be logged for the player. Particularly, fleet events should be kept for the player to view to get feedback or be alerted about hostile fleets.
+- Player inbox: Various events should be logged for the player. Particularly, fleet events should be kept for the player to view, and they should be alerted about approaching hostile fleets.
 - NPC planets to be raided (and perhaps raid back!)
